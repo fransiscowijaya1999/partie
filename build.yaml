@@ -1,0 +1,9 @@
+targets:
+  $default:
+    builders:
+      drift_dev:
+        options:
+          databases:
+            # Required: A name for the database and its path
+            partie_database: lib/database.dart
+          schema_dir: lib/tables
