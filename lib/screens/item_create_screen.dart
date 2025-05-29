@@ -2,34 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:partie/components/duplicate_list.dart';
 import 'package:partie/components/vehicle_form.dart';
 import 'package:partie/database.dart';
-import 'package:partie/repositories/vehicle.dart';
+import 'package:partie/repositories/item.dart';
 
-class VehicleCreateScreen extends StatefulWidget {
-  const VehicleCreateScreen({ super.key });
+class ItemCreateScreen extends StatefulWidget {
+  const ItemCreateScreen({ super.key });
 
   @override
-  State<VehicleCreateScreen> createState() => _VehicleCreateScreenState();
+  State<ItemCreateScreen> createState() => _ItemCreateScreenState();
 }
 
-class _VehicleCreateScreenState extends State<VehicleCreateScreen> {
-  late Future<List<Vehicle>> _duplicates;
+class _ItemCreateScreenState extends State<ItemCreateScreen> {
+  late Future<List<Item>> _duplicates;
   String name = '';
   String description = '';
 
   @override
   void initState() {
     super.initState();
-    _duplicates = VehicleRepository.filter(name: name, limit: 5);
+    _duplicates = ItemRepository.filter(name: name, limit: 5);
   }
 
-  Future<void> _submitVehicle() async {
-    await VehicleRepository.createVehicle(name, description);
+  Future<void> _submitItem() async {
+    await ItemRepository.createItem(name, description);
   }
 
   void setName(String text) {
     setState(() {
       name = text;
-      _duplicates = VehicleRepository.filter(name: name, limit: 5);
+      _duplicates = ItemRepository.filter(name: name, limit: 5);
     });
   }
 
@@ -42,7 +42,7 @@ class _VehicleCreateScreenState extends State<VehicleCreateScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Create Vehicle'),),
+      appBar: AppBar(title: Text('Create Item'),),
       body: Padding(
         padding: const EdgeInsets.all(10),
         child: Column(
@@ -78,7 +78,7 @@ class _VehicleCreateScreenState extends State<VehicleCreateScreen> {
             ),
             SizedBox(height: 10,),
             ElevatedButton(
-              onPressed: _submitVehicle,
+              onPressed: _submitItem,
               child: Text('Submit')
             )
           ],

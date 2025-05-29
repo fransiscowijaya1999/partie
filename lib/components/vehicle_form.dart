@@ -56,6 +56,9 @@ class _VehicleFormState extends State<VehicleForm> {
             ),
             SizedBox(height: 5,),
             TextField(
+              keyboardType: TextInputType.multiline,
+              minLines: 3,
+              maxLines: 8,
               controller: descriptionController,
               decoration: decorationGenerator('Description'),
             )
