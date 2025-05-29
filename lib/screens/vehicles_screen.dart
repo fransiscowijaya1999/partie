@@ -15,13 +15,13 @@ class VehiclesScreen extends StatefulWidget {
 }
 
 class _VehicleScreenState extends State<VehiclesScreen> {
-  late Future<List<Vehicle>> _duplicates;
+  late Stream<List<Vehicle>> _vehiclesStream;
 
   @override
   void initState() {
     super.initState();
 
-    _duplicates = VehicleRepository.filter();
+    _vehiclesStream = VehicleRepository.filterWatch();
   }
 
 
@@ -29,26 +29,24 @@ class _VehicleScreenState extends State<VehiclesScreen> {
   Widget build(BuildContext context) {
     return MainScaffold(
       title: 'Vehicle',
-      body: Center(
-        child: FutureBuilder(
-          future: _duplicates,
-          builder: (context, snapshot) {
-            switch (snapshot.connectionState) {
-              case ConnectionState.waiting:
-                return Center(child: CircularProgressIndicator(),);
-              case ConnectionState.done:
-                if (snapshot.hasData) {
-                  final duplicates = snapshot.data!.map((v) => v.name).toList();
+      body: StreamBuilder<List<Vehicle>>(
+        stream: _vehiclesStream,
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+              return Center(child: CircularProgressIndicator(),);
+            case ConnectionState.active:
+            case ConnectionState.done:
+              if (snapshot.hasData) {
+                final vehicles = snapshot.data!.map((v) => v.name).toList();
 
-                  return DuplicateList(duplicates: duplicates);
-                } else {
-                  return DuplicateList(duplicates: []);
-                }
-              default:
-                return Text('error');
-            }
-          },
-        ),
+                return DuplicateList(duplicates: vehicles);
+              } else {
+                return DuplicateList(duplicates: []);
+              }
+          }
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
