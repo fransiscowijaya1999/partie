@@ -18,4 +18,15 @@ class VehicleRepository {
   static Future<void> createVehicle(String name, String description) async {
     await db.managers.vehicles.create((v) => v(name: name, description: description));
   }
+
+  static Stream<List<Part>> searchPartWatch(int vehicleId, { String name = '', int limit = 0 }) {
+    final query = db.managers.parts
+      .withReferences(
+        (prefetch) => prefetch(partVehiclesRefs: true)
+      )
+      .filter((f) => f.partVehiclesRefs((pv) => pv.vehicleId.id.equals(vehicleId)))
+      .orderBy((o) => o.name.asc());
+
+    return query.map((row) => row.$1).watch();
+  }
 }

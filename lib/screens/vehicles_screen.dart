@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:partie/components/duplicate_list.dart';
+import 'package:partie/components/item_list.dart';
 import 'package:partie/components/main_scaffold.dart';
+import 'package:partie/components/vehicle_list.dart';
 import 'package:partie/database.dart';
 import 'package:partie/repositories/vehicle.dart';
 import 'package:partie/screens/vehicle_create_screen.dart';
@@ -39,11 +41,11 @@ class _VehicleScreenState extends State<VehiclesScreen> {
             case ConnectionState.active:
             case ConnectionState.done:
               if (snapshot.hasData) {
-                final vehicles = snapshot.data!.map((v) => v.name).toList();
+                final vehicles = snapshot.data!;
 
-                return DuplicateList(duplicates: vehicles);
+                return VehicleList(vehicles: vehicles);
               } else {
-                return DuplicateList(duplicates: []);
+                return VehicleList(vehicles: []);
               }
           }
         },
