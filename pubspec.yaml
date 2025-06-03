@@ -39,6 +39,7 @@ dependencies:
   path_provider: ^2.1.5
   markdown_widget: ^2.3.2+8
   flutter_expandable_fab: ^2.5.1
+  dropdown_search: ^6.0.2
 
 dev_dependencies:
   flutter_test:

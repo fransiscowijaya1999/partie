@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:partie/components/vehicle_part_item.dart';
 import 'package:partie/database.dart';
+import 'package:partie/screens/part_detail_screen.dart';
 
 class VehiclePartList extends StatelessWidget {
   const VehiclePartList({
@@ -25,9 +25,16 @@ class VehiclePartList extends StatelessWidget {
       itemBuilder:(context, index) {
         final part = parts[index];
 
-        return VehiclePartItem(
-          name: part.name,
-          description: part.description,
+        return ListTile(
+          title: Text(part.name),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => PartDetailScreen(
+                title: part.name,
+                partId: part.id,
+              )),
+            );
+          },
         );
       },
     );

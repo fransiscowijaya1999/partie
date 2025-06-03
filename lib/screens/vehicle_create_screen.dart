@@ -1,3 +1,4 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:partie/components/duplicate_list.dart';
 import 'package:partie/components/vehicle_form.dart';
@@ -13,8 +14,11 @@ class VehicleCreateScreen extends StatefulWidget {
 
 class _VehicleCreateScreenState extends State<VehicleCreateScreen> {
   late Future<List<Vehicle>> _duplicates;
+
   String name = '';
   String description = '';
+  Vehicle? selectedParent;
+  final parentController = TextEditingController();
 
   @override
   void initState() {
@@ -72,10 +76,36 @@ class _VehicleCreateScreenState extends State<VehicleCreateScreen> {
                 )
             ),
             SizedBox(height: 10,),
+            Card(
+              child: Padding(
+                padding: EdgeInsets.all(10),
+                child: DropdownSearch<Vehicle>(
+                  items: (f, s) => VehicleRepository.filter(name: f),
+                  itemAsString: (item) => item.name,
+                  selectedItem: selectedParent,
+                  compareFn: (i, s) => i.id == s.id,
+                  onChanged: (value) => setState(() {
+                    selectedParent = value;
+                  }),
+                  popupProps: PopupProps.bottomSheet(
+                    searchDelay: Duration(milliseconds: 300),
+                    disableFilter: true,
+                    showSearchBox: true,
+                    itemBuilder: (context, item, isDisabled, isSelected) =>
+                      Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Text(item.name),
+                    ),
+                  ),
+                )
+              ),
+            ),
+            SizedBox(height: 10,),
             VehicleForm(
               setName: setName,
               setDescription: setDescription,
             ),
+            SizedBox(height: 10,),
             SizedBox(height: 10,),
             ElevatedButton(
               onPressed: _submitVehicle,

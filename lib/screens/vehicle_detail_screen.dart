@@ -5,6 +5,7 @@ import 'package:partie/components/part_create_dialog.dart';
 import 'package:partie/components/vehicle_part_finder.dart';
 import 'package:partie/database.dart';
 import 'package:partie/repositories/part.dart';
+import 'package:partie/repositories/vehicle.dart';
 
 class VehicleDetailScreen extends StatefulWidget {
   const VehicleDetailScreen({
@@ -19,6 +20,14 @@ class VehicleDetailScreen extends StatefulWidget {
 }
 
 class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
+  late Future<Vehicle?>? parentVehicle;
+
+  @override
+  void initState() {
+    super.initState();
+    parentVehicle = widget.vehicle.parentId != null ? VehicleRepository.getVehicle(widget.vehicle.parentId!) : null;
+  }
+
   Future<void> _showCreatePartDialog() async {
     await showDialog(
       context: context,
@@ -66,7 +75,24 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
         child: Column(
           children: [
             Center(
-              child: Text(widget.vehicle.name),
+              child: Column(
+                children: [
+                  Text(widget.vehicle.name),
+                  widget.vehicle.parentId != null ?
+                    FutureBuilder(
+                      future: parentVehicle,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          final parent = snapshot.data!;
+                          return Text('Inherit: ${parent.name}');
+                        } else {
+                          return Text('Error fetching data');
+                        }
+                      },
+                    )
+                    : Text('Inherit nothing')
+                ],
+              ),
             ),
             widget.vehicle.description.isEmpty ?
               Center(child: Text('No description yet.'),) :

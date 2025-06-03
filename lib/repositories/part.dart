@@ -11,4 +11,8 @@ class PartRepository {
       await db.managers.partVehicles.create((pv) => pv(partId: created, vehicleId: vehicleId));
     });
   }
+
+  static Stream<Part> getPartDetailStream(int id) {
+    return db.managers.parts.filter((part) => part.id.equals(id)).watchSingle();
+  }
 }

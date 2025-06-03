@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:partie/components/duplicate_list.dart';
-import 'package:partie/components/item_list.dart';
 import 'package:partie/components/main_scaffold.dart';
 import 'package:partie/components/vehicle_list.dart';
 import 'package:partie/database.dart';
