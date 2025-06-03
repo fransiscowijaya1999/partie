@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:partie/database.dart';
-import 'package:partie/screens/item_detail_screen.dart';
 import 'package:partie/screens/vehicle_detail_screen.dart';
 
 class VehicleList extends StatelessWidget {

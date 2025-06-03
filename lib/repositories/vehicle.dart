@@ -16,7 +16,7 @@ class VehicleRepository {
   }
 
   static Future<void> createVehicle(String name, String description, { int? parentId }) async {
-    await db.managers.vehicles.create((v) => v(name: name, description: description));
+    await db.managers.vehicles.create((v) => v(name: name, description: description, parentId: Value(parentId)));
   }
 
   static Future<Vehicle?>getVehicle(int id) async {
@@ -58,13 +58,11 @@ class VehicleRepository {
       ' INNER JOIN part_vehicles ON part_vehicles.part_id = parts.id'
       ' LEFT JOIN inherited_part_replacements ON inherited_part_replacements.replacement_part_id = parts.id'
       ' WHERE part_vehicles.vehicle_id = ?'
-      ' ${parentId != null ? 'OR part_vehicles.vehicle_id = $parentId' : ''}'
-      ' ${parentId != null ? 'AND inherited_part_replacements.vehicle_id = $vehicleId AND parts.id NOT IN (SELECT inherited_part_id FROM inherited_part_replacements WHERE vehicle_id = $vehicleId)' : ''}',
+      ' ${parentId != null ? 'OR (part_vehicles.vehicle_id = $parentId' : ''}'
+      ' ${parentId != null ? 'AND parts.id NOT IN (SELECT inherited_part_id FROM inherited_part_replacements WHERE vehicle_id = $vehicleId))' : ''}',
       variables: [
         Variable.withInt(vehicleId)
       ]
-    ).watch().map((rows) {
-      return rows.map((row) => db.parts.map(row.data)).toList();
-    });
+    ).map((row) => db.parts.map(row.data)).watch();
   }
 }

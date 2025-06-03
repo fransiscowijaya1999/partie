@@ -6,10 +6,12 @@ import 'package:partie/repositories/vehicle.dart';
 class VehiclePartFinder extends StatefulWidget {
   const VehiclePartFinder({
     super.key,
-    required this.vehicleId
+    required this.vehicleId,
+    this.parentId
   });
 
   final int vehicleId;
+  final int? parentId;
 
   @override
   State<StatefulWidget> createState() => _VehiclePartFinderState();
@@ -24,7 +26,7 @@ class _VehiclePartFinderState extends State<VehiclePartFinder> {
   void initState() {
     super.initState();
 
-    _stream = VehicleRepository.searchPartWatch(widget.vehicleId);
+    _stream = VehicleRepository.searchPartWatch(widget.vehicleId, parentId: widget.parentId);
   }
 
   @override

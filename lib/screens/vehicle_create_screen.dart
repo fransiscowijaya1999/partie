@@ -27,7 +27,8 @@ class _VehicleCreateScreenState extends State<VehicleCreateScreen> {
   }
 
   Future<void> _submitVehicle() async {
-    await VehicleRepository.createVehicle(name, description);
+    final parentId = selectedParent?.id;
+    await VehicleRepository.createVehicle(name, description, parentId: parentId);
   }
 
   void setName(String text) {
