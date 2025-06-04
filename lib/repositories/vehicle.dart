@@ -41,6 +41,9 @@ class VehicleRepository {
   static Future<Vehicle>getVehicleNotNull(int id) async {
     return await db.managers.vehicles.filter((f) => f.id.equals(id)).getSingle();
   }
+  static Stream<Vehicle> getVehicleWatch(int id) {
+    return db.managers.vehicles.filter((f) => f.id.equals(id)).watchSingle();
+  }
 
   static Stream<List<Part>> searchPartWatch(int vehicleId, { int? parentId, String name = '', int limit = 0 }) {
     // final tsx = db.transaction(() async {
@@ -84,5 +87,20 @@ class VehicleRepository {
         Variable.withInt(vehicleId)
       ]
     ).map((row) => db.parts.map(row.data)).watch();
+  }
+
+  static Future<List<Part>> searchPart(int vehicleId, { int? parentId, String name = '', int limit = 0 }) {
+    return db.customSelect(
+      'SELECT parts.id, parts.name, parts.description FROM parts'
+      ' INNER JOIN part_vehicles ON part_vehicles.part_id = parts.id'
+      ' LEFT JOIN inherited_part_replacements ON inherited_part_replacements.replacement_part_id = parts.id'
+      ' WHERE part_vehicles.vehicle_id = ?'
+      ' ${parentId != null ? 'OR (part_vehicles.vehicle_id = $parentId' : ''}'
+      ' ${parentId != null ? 'AND parts.id NOT IN (SELECT inherited_part_id FROM inherited_part_replacements WHERE vehicle_id = $vehicleId))' : ''}'
+      ' ORDER BY parts.name',
+      variables: [
+        Variable.withInt(vehicleId)
+      ]
+    ).map((row) => db.parts.map(row.data)).get();
   }
 }

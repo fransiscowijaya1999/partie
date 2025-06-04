@@ -44,7 +44,7 @@ class _VehicleEditScreenState extends State<VehicleEditScreen> {
     final parentId = selectedParent?.id;
     await VehicleRepository.updateVehicle(widget.id, name, description, parentId: parentId);
     if (mounted) {
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(parentId);
     }
   }
 

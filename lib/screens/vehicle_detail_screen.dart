@@ -22,20 +22,26 @@ class VehicleDetailScreen extends StatefulWidget {
 
 class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
   late Future<Vehicle> _vehicleFuture;
+  late Future<List<Part>> _partsFuture;
 
   @override
   void initState() {
     super.initState();
     _vehicleFuture = VehicleRepository.getVehicleNotNull(widget.vehicle.id);
+    _partsFuture = VehicleRepository.searchPart(widget.vehicle.id, parentId: widget.vehicle.parentId);
   }
 
-  Future<void> _showCreatePartDialog() async {
+  Future<void> _showCreatePartDialog(int? parentId) async {
     await showDialog(
       context: context,
       builder:(context) {
         return PartCreateDialog(
-          onCreate: (name, description) async => {
-            await PartRepository.createPartForVehicle(widget.vehicle.id, name, description)
+          onCreate: (name, description) async {
+            await PartRepository.createPartForVehicle(widget.vehicle.id, name, description);
+
+            setState(() {
+              _partsFuture = VehicleRepository.searchPart(widget.vehicle.id, parentId: parentId);
+            });
           },
         );
       },
@@ -44,7 +50,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Vehicle>(
+    return FutureBuilder(
       future: _vehicleFuture,
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
@@ -53,139 +59,142 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
           case ConnectionState.waiting:
             return Scaffold(body: Center(child: CircularProgressIndicator(),));
           case ConnectionState.done:
-            if (snapshot.hasData) {
-              final vehicle = snapshot.data!;
+            final vehicle = snapshot.data!;
 
-              return Scaffold(
-                appBar: AppBar(
-                  title: Text(vehicle.name),
-                ),
-                floatingActionButtonLocation: ExpandableFab.location,
-                floatingActionButton: ExpandableFab(
+            return Scaffold(
+              appBar: AppBar(
+                title: Text(vehicle.name),
+              ),
+              floatingActionButtonLocation: ExpandableFab.location,
+              floatingActionButton: ExpandableFab(
+                children: [
+                  FloatingActionButton.small(
+                    heroTag: null,
+                    child: Icon(Icons.link),
+                    onPressed: () {
+                      
+                    },
+                  ),
+                  FloatingActionButton.small(
+                    heroTag: null,
+                    child: Icon(Icons.copy),
+                    onPressed: () {
+                      
+                    },
+                  ),
+                  FloatingActionButton(
+                    heroTag: null,
+                    onPressed: () => _showCreatePartDialog(vehicle.parentId),
+                    child: Icon(Icons.add),
+                  )
+                ]
+              ),
+              body: SingleChildScrollView(
+                child: Column(
                   children: [
-                    FloatingActionButton.small(
-                      heroTag: null,
-                      child: Icon(Icons.link),
-                      onPressed: () {
-                        
+                    Text(vehicle.name),
+                    vehicle.parentId != null ?
+                    FutureBuilder(
+                      future: vehicle.parentId != null ? VehicleRepository.getVehicle(vehicle.parentId!) : null,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          final parent = snapshot.data!;
+                          return Text('Inherit: ${parent.name}');
+                        } else {
+                          return Text('Error fetching data');
+                        }
                       },
-                    ),
-                    FloatingActionButton.small(
-                      heroTag: null,
-                      child: Icon(Icons.copy),
-                      onPressed: () {
-                        
-                      },
-                    ),
-                    FloatingActionButton(
-                      heroTag: null,
-                      onPressed: _showCreatePartDialog,
-                      child: Icon(Icons.add),
                     )
-                  ]
-                ),
-                body: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Center(
-                        child: Column(
-                          children: [
-                            Text(vehicle.name),
-                            vehicle.parentId != null ?
-                              FutureBuilder(
-                                future: vehicle.parentId != null ? VehicleRepository.getVehicle(vehicle.parentId!) : null,
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasData) {
-                                    final parent = snapshot.data!;
-                                    return Text('Inherit: ${parent.name}');
-                                  } else {
-                                    return Text('Error fetching data');
-                                  }
-                                },
-                              )
-                              : Text('Inherit nothing')
-                          ],
-                        ),
-                      ),
-                      vehicle.description.isEmpty ?
-                        Center(child: Text('No description yet.'),) :
-                        Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: SizedBox(
-                            height: 350,
-                            child: Card(
-                              color: Colors.white,
-                              child: SingleChildScrollView(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(15),
-                                  child: MarkdownBlock(data: vehicle.description),
-                                ),
-                              ),
+                    : Text('Inherit nothing'),
+                    vehicle.description.isEmpty ?
+                    Center(child: Text('No description yet.'),) :
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: SizedBox(
+                        height: 350,
+                        child: Card(
+                          color: Colors.white,
+                          child: SingleChildScrollView(
+                            child: Padding(
+                              padding: const EdgeInsets.all(15),
+                              child: MarkdownBlock(data: vehicle.description),
                             ),
                           ),
                         ),
-                      Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: FutureBuilder(
-                          future: vehicle.parentId != null ? VehicleRepository.getVehicle(vehicle.parentId!) : null,
-                          builder: (context, snapshot) {
-                            return Row(
-                              children: [
-                                Expanded(
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                      await Navigator.of(context).push(
-                                        MaterialPageRoute(builder: (context) => VehicleEditScreen(
-                                          id: vehicle.id,
-                                          name: vehicle.name,
-                                          description: vehicle.description,
-                                          parentVehicle: snapshot.data,
-                                        )),
-                                      );
-              
-                                      setState(() {
-                                        _vehicleFuture = VehicleRepository.getVehicleNotNull(widget.vehicle.id);
-                                      });
-                                    },
-                                    child: Icon(Icons.edit)
-                                  ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: FutureBuilder(
+                        future: vehicle.parentId != null ? VehicleRepository.getVehicle(vehicle.parentId!) : null,
+                        builder: (context, snapshot) {
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    final int? pId = await Navigator.of(context).push(
+                                      MaterialPageRoute(builder: (context) => VehicleEditScreen(
+                                        id: vehicle.id,
+                                        name: vehicle.name,
+                                        description: vehicle.description,
+                                        parentVehicle: snapshot.data,
+                                      )),
+                                    );
+
+                                    setState(() {
+                                      _vehicleFuture = VehicleRepository.getVehicleNotNull(widget.vehicle.id);
+                                      _partsFuture = VehicleRepository.searchPart(widget.vehicle.id, parentId: pId);
+                                    });
+                                  },
+                                  child: Icon(Icons.edit)
                                 ),
-                                SizedBox(width: 10,),
-                                ElevatedButton(onPressed: () async {
-                                  await VehicleRepository.deleteVehicle(vehicle.id);
-                                  if (context.mounted) {
-                                    Navigator.of(context).pop();
-                                  }
-                                }, child: Icon(Icons.delete))
-                              ],
-                            );
-                          },
+                              ),
+                              SizedBox(width: 10,),
+                              ElevatedButton(onPressed: () async {
+                                await VehicleRepository.deleteVehicle(vehicle.id);
+                                if (context.mounted) {
+                                  Navigator.of(context).pop();
+                                }
+                              }, child: Icon(Icons.delete))
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(height: 15,),
+                    Center(
+                      child: Text('Parts',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold
                         ),
                       ),
-                      SizedBox(height: 15,),
-                      Center(
-                        child: Text('Parts',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 10,),
-                      VehiclePartFinder(title: vehicle.name, vehicleId: vehicle.id, parentId: vehicle.parentId,),
-                      SizedBox(
-                        height: 500,
-                      )
-                    ],
-                  ),
+                    ),
+                    SizedBox(height: 10,),
+                    FutureBuilder(future: _partsFuture, builder: (context, snapshot) {
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.none:
+                        case ConnectionState.active:
+                        case ConnectionState.waiting:
+                          return Center(child: CircularProgressIndicator(),);
+                        case ConnectionState.done:
+                          if (snapshot.hasData) {
+                            final parts = snapshot.data!;
+
+                            return VehiclePartFinder(title: vehicle.name, parts: parts);
+                          } else {
+                            return Text('Data not set');
+                          }
+                      }
+                    }),
+                    SizedBox(height: 300,)
+                  ],
                 ),
-              );
-            } else {
-              return Center(child: Text('failed to load'),);
-            }
+              ),
+            );
         }
-        
-      }
-    );   
+      },
+    );
   }
 }

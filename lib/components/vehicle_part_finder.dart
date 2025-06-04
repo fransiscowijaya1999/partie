@@ -6,13 +6,11 @@ import 'package:partie/repositories/vehicle.dart';
 class VehiclePartFinder extends StatefulWidget {
   const VehiclePartFinder({
     super.key,
-    required this.vehicleId,
-    this.parentId,
+    required this.parts,
     this.title = ''
   });
 
-  final int vehicleId;
-  final int? parentId;
+  final List<Part> parts;
   final String title;
 
   @override
@@ -21,14 +19,23 @@ class VehiclePartFinder extends StatefulWidget {
 
 class _VehiclePartFinderState extends State<VehiclePartFinder> {
   final queryController = TextEditingController();
-
-  late Stream<List<Part>> _stream;
+  List<Part> parts = [];
 
   @override
   void initState() {
     super.initState();
+    parts = widget.parts.where((part) => part.name.toUpperCase().contains(queryController.text.toUpperCase())).toList();
+    queryController.addListener(() {
+      setState(() {
+        parts = widget.parts.where((part) => part.name.toUpperCase().contains(queryController.text.toUpperCase())).toList();
+      });
+    });
+  }
 
-    _stream = VehicleRepository.searchPartWatch(widget.vehicleId, parentId: widget.parentId);
+  @override
+  void dispose() {
+    queryController.dispose();
+    super.dispose();
   }
 
   @override
@@ -50,29 +57,11 @@ class _VehiclePartFinderState extends State<VehiclePartFinder> {
           ),
         ),
         SizedBox(height: 20,),
-        StreamBuilder<List<Part>>(
-          stream: _stream,
-          builder: (context, snapshot) {
-            switch (snapshot.connectionState) {
-              case ConnectionState.none:
-              case ConnectionState.waiting:
-                return Center(child: CircularProgressIndicator(),);
-              case ConnectionState.active:
-              case ConnectionState.done:
-                if (snapshot.hasData) {
-                  final parts = snapshot.data!;
-
-                  return  VehiclePartList(
-                    parts: parts,
-                    title: widget.title,
-                  );
-                } else {
-                  return VehiclePartList(parts: []);
-                }
-            }
-          },
-      )
-      ],
+        VehiclePartList(
+          parts: parts,
+          title: widget.title,
+        )
+      ]
     );
   }
 }
