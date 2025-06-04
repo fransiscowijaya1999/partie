@@ -2,11 +2,15 @@ import 'package:drift/drift.dart';
 import 'package:partie/database.dart';
 
 class VehicleRepository {
-  static Future<List<Vehicle>> filter({ String name = '', int limit = 10 }) async {
+  static Future<List<Vehicle>> filter({ String name = '', int limit = 10, int? ignoredId }) async {
+    var query = db.managers.vehicles
+      .filter((f) => f.name.contains(name, caseInsensitive: true));
+    
+    if (ignoredId != null) {
+      query = query.filter((f) => f.id.not(ignoredId));
+    }
 
-    List<Vehicle> vehicles = await db.managers.vehicles
-      .filter((f) => f.name.contains(name, caseInsensitive: true))
-      .get(limit: limit);
+    List<Vehicle> vehicles = await query.get(limit: limit);
 
     return vehicles;
   }
@@ -19,8 +23,17 @@ class VehicleRepository {
     await db.managers.vehicles.create((v) => v(name: name, description: description, parentId: Value(parentId)));
   }
 
+  static Future<void> updateVehicle(int id, String name, String description, { int? parentId }) async {
+    await db.managers.vehicles
+      .filter((f) => f.id.equals(id))
+      .update((v) => v(name: Value(name), description: Value(description), parentId: Value(parentId)));
+  }
+
   static Future<Vehicle?>getVehicle(int id) async {
     return await db.managers.vehicles.filter((f) => f.id.equals(id)).getSingleOrNull();
+  }
+  static Future<Vehicle>getVehicleNotNull(int id) async {
+    return await db.managers.vehicles.filter((f) => f.id.equals(id)).getSingle();
   }
 
   static Stream<List<Part>> searchPartWatch(int vehicleId, { int? parentId, String name = '', int limit = 0 }) {
@@ -59,7 +72,8 @@ class VehicleRepository {
       ' LEFT JOIN inherited_part_replacements ON inherited_part_replacements.replacement_part_id = parts.id'
       ' WHERE part_vehicles.vehicle_id = ?'
       ' ${parentId != null ? 'OR (part_vehicles.vehicle_id = $parentId' : ''}'
-      ' ${parentId != null ? 'AND parts.id NOT IN (SELECT inherited_part_id FROM inherited_part_replacements WHERE vehicle_id = $vehicleId))' : ''}',
+      ' ${parentId != null ? 'AND parts.id NOT IN (SELECT inherited_part_id FROM inherited_part_replacements WHERE vehicle_id = $vehicleId))' : ''}'
+      ' ORDER BY parts.name',
       variables: [
         Variable.withInt(vehicleId)
       ]

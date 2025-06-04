@@ -4,11 +4,15 @@ class VehicleForm extends StatefulWidget {
   const VehicleForm({
     super.key,
     this.setName,
-    this.setDescription
+    this.setDescription,
+    this.name = '',
+    this.description = ''
   });
 
   final ValueSetter<String>? setName;
   final ValueSetter<String>? setDescription;
+  final String name;
+  final String description;
 
   @override
   State<VehicleForm> createState() => _VehicleFormState();
@@ -32,6 +36,8 @@ class _VehicleFormState extends State<VehicleForm> {
   void initState() {
     super.initState();
 
+    nameController.text = widget.name;
+    descriptionController.text = widget.description;
     nameController.addListener(_setName);
     descriptionController.addListener(_setDesc);
   }

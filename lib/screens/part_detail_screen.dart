@@ -31,8 +31,12 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
       context: context,
       builder:(context) {
         return PartCreateDialog(
-          onCreate: (name, description) async => {
-            await PartRepository.createPartForPart(widget.partId, name, description)
+          onCreate: (name, description) async {
+            await PartRepository.createPartForPart(widget.partId, name, description);
+            setState(() {
+              _partStream = PartRepository.getPartDetailStream(widget.partId);
+              _partChildrenFuture = PartRepository.getPartChildren(widget.partId);
+            });
           },
         );
       },
