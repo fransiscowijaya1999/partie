@@ -29,6 +29,12 @@ class VehicleRepository {
       .update((v) => v(name: Value(name), description: Value(description), parentId: Value(parentId)));
   }
 
+  static Future<void> deleteVehicle(int id) async {
+    await db.managers.vehicles
+      .filter((f) => f.id.equals(id))
+      .delete();
+  }
+
   static Future<Vehicle?>getVehicle(int id) async {
     return await db.managers.vehicles.filter((f) => f.id.equals(id)).getSingleOrNull();
   }

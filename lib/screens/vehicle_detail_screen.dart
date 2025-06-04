@@ -151,7 +151,12 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                                   ),
                                 ),
                                 SizedBox(width: 10,),
-                                ElevatedButton(onPressed: null, child: Icon(Icons.delete))
+                                ElevatedButton(onPressed: () async {
+                                  await VehicleRepository.deleteVehicle(vehicle.id);
+                                  if (context.mounted) {
+                                    Navigator.of(context).pop();
+                                  }
+                                }, child: Icon(Icons.delete))
                               ],
                             );
                           },
