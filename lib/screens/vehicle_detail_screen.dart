@@ -121,7 +121,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
               ),
             ),
             SizedBox(height: 10,),
-            VehiclePartFinder(vehicleId: widget.vehicle.id, parentId: widget.vehicle.parentId,),
+            VehiclePartFinder(title: widget.vehicle.name, vehicleId: widget.vehicle.id, parentId: widget.vehicle.parentId,),
             SizedBox(
               height: 500,
             )

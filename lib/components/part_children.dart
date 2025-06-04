@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:partie/models/part_child.dart';
 import 'package:partie/screens/part_detail_screen.dart';
+import 'package:partie/utils/string_builder.dart';
 
 class PartChildren extends StatelessWidget {
   const PartChildren({
@@ -32,7 +33,7 @@ class PartChildren extends StatelessWidget {
           onTap: child.isCategory ? () {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => PartDetailScreen(
-                title: title.isEmpty ? '$title \\ ${child.name}' : child.name,
+                title: StringBuilder.titleBuilder(title, child.name),
                 partId: child.id,
               )),
             );

@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:partie/database.dart';
 import 'package:partie/screens/part_detail_screen.dart';
+import 'package:partie/utils/string_builder.dart';
 
 class VehiclePartList extends StatelessWidget {
   const VehiclePartList({
     super.key,
-    required this.parts
+    required this.parts,
+    this.title = ''
   });
 
   final List<Part> parts;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +33,7 @@ class VehiclePartList extends StatelessWidget {
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => PartDetailScreen(
-                title: part.name,
+                title: StringBuilder.titleBuilder(title, part.name),
                 partId: part.id,
               )),
             );

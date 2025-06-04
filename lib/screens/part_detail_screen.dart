@@ -127,7 +127,7 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
                             case ConnectionState.active:
                             case ConnectionState.done:
                               if (snapshot.hasData) {
-                                return PartChildren(children: snapshot.data!);
+                                return PartChildren(title: widget.title, children: snapshot.data!);
                               } else {
                                 return PartChildren(children: []);
                               }

@@ -7,11 +7,13 @@ class VehiclePartFinder extends StatefulWidget {
   const VehiclePartFinder({
     super.key,
     required this.vehicleId,
-    this.parentId
+    this.parentId,
+    this.title = ''
   });
 
   final int vehicleId;
   final int? parentId;
+  final String title;
 
   @override
   State<StatefulWidget> createState() => _VehiclePartFinderState();
@@ -61,7 +63,8 @@ class _VehiclePartFinderState extends State<VehiclePartFinder> {
                   final parts = snapshot.data!;
 
                   return  VehiclePartList(
-                    parts: parts
+                    parts: parts,
+                    title: widget.title,
                   );
                 } else {
                   return VehiclePartList(parts: []);
