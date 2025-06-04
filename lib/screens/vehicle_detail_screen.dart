@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:partie/components/part_create_dialog.dart';
+import 'package:partie/components/part_selection_dialog.dart';
 import 'package:partie/components/vehicle_part_finder.dart';
 import 'package:partie/database.dart';
 import 'package:partie/repositories/part.dart';
@@ -48,6 +49,23 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
     );
   }
 
+  Future<void> _showLinkPartDialog(int? parentId) async {
+    await showDialog(
+      context: context,
+      builder:(context) {
+        return PartSelectionDialog(
+          onSelected: (part) async {
+            PartRepository.linkPartForVehicle(part.id, widget.vehicle.id);
+
+            setState(() {
+              _partsFuture = VehicleRepository.searchPart(widget.vehicle.id, parentId: parentId);
+            });
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -71,16 +89,12 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                   FloatingActionButton.small(
                     heroTag: null,
                     child: Icon(Icons.link),
-                    onPressed: () {
-                      
-                    },
+                    onPressed: () => _showLinkPartDialog(vehicle.parentId),
                   ),
                   FloatingActionButton.small(
                     heroTag: null,
                     child: Icon(Icons.copy),
-                    onPressed: () {
-                      
-                    },
+                    onPressed: () => _showLinkPartDialog(vehicle.parentId),
                   ),
                   FloatingActionButton(
                     heroTag: null,

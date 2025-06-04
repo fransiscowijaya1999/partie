@@ -40,6 +40,12 @@ class PartRepository {
     });
   }
 
+  static Future<void> linkPartForVehicle(int partId, int vehicleId) async {
+    return db.transaction(() async {
+      await db.managers.partVehicles.create((pv) => pv(partId: partId, vehicleId: vehicleId));
+    });
+  }
+
   static Stream<Part> getPartDetailStream(int id) {
     return db.managers.parts.filter((part) => part.id.equals(id)).watchSingle();
   }
