@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:partie/components/vehicle_part_list.dart';
 import 'package:partie/database.dart';
-import 'package:partie/repositories/vehicle.dart';
 
 class VehiclePartFinder extends StatefulWidget {
   const VehiclePartFinder({
