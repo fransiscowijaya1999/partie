@@ -1,6 +1,16 @@
 import 'package:drift/drift.dart';
 import 'package:partie/database.dart';
 
+class VehicleListStream {
+  const VehicleListStream(
+    this.vehicles,
+    this.count
+  );
+
+  final Stream<List<Vehicle>> vehicles;
+  final Stream<int> count;
+}
+
 class VehicleRepository {
   static Future<List<Vehicle>> filter({ String name = '', int limit = 10, int? ignoredId }) async {
     var query = db.managers.vehicles
@@ -20,6 +30,18 @@ class VehicleRepository {
       .filter((f) => f.name.contains(name, caseInsensitive: true));
 
     return query.watch(limit: limit);
+  }
+
+  static VehicleListStream filterWithAggregateWatch({ String name = '', int limit = 10, int page = 0, int? ignoredId }) {
+    var query = db.managers.vehicles
+      .filter((f) => f.name.contains(name, caseInsensitive: true));
+
+    final count = query
+      .count().asStream();
+
+    final vehicles = query.watch(limit: limit, offset: page * limit);
+
+    return VehicleListStream(vehicles, count);
   }
 
   static Future<void> createVehicle(String name, String description, { int? parentId }) async {

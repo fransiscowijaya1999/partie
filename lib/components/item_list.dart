@@ -18,6 +18,7 @@ class ItemList extends StatelessWidget {
       return Center(child: Text('Items not found'),);
     } else {
       return ListView.builder(
+        shrinkWrap: true,
         itemCount: items!.length,
         itemBuilder: (context, index) {
           final item = items![index];
