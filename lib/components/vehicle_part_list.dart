@@ -7,11 +7,15 @@ class VehiclePartList extends StatelessWidget {
   const VehiclePartList({
     super.key,
     required this.parts,
+    required this.vehicleId,
+    this.onPop,
     this.title = ''
   });
 
   final List<Part> parts;
+  final int vehicleId;
   final String title;
+  final VoidCallback? onPop;
 
   @override
   Widget build(BuildContext context) {
@@ -30,13 +34,18 @@ class VehiclePartList extends StatelessWidget {
 
         return ListTile(
           title: Text(part.name),
-          onTap: () {
-            Navigator.of(context).push(
+          onTap: () async {
+            await Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => PartDetailScreen(
                 title: StringBuilder.titleBuilder(title, part.name),
+                parentId: vehicleId,
                 partId: part.id,
               )),
             );
+
+            if (onPop != null) {
+              onPop!();
+            }
           },
         );
       },

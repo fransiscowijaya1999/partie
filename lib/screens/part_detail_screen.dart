@@ -12,11 +12,15 @@ class PartDetailScreen extends StatefulWidget {
   const PartDetailScreen({
     super.key,
     required this.title,
-    required this.partId
+    required this.parentId,
+    required this.partId,
+    this.isVehiclePart = true
   });
 
   final String title;
+  final int parentId;
   final int partId;
+  final bool isVehiclePart;
 
   @override
   State<PartDetailScreen> createState() => _PartDetailScreenState();
@@ -121,6 +125,29 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
                         ),
                       ) : SizedBox(height: 10),
                       SizedBox(height: 10,),
+                      Row(
+                        children: [
+                          Expanded(child: ElevatedButton(
+                            onPressed: null,
+                            child: Icon(Icons.edit))
+                          ),
+                          ElevatedButton(
+                            onPressed: () async {
+                              if (widget.isVehiclePart) {
+                                await PartRepository.unlinkPart(part.id, widget.parentId);
+                              } else {
+                                await PartRepository.deletePart(part.id);
+                              }
+
+                              if (context.mounted) {
+                                Navigator.of(context).pop();
+                              }
+                            },
+                            child: Icon(Icons.delete)
+                          )
+                        ],
+                      ),
+                      SizedBox(height: 10,),
                       FutureBuilder(
                         future: _partChildrenFuture,
                         builder: (context, snapshot) {
@@ -131,9 +158,18 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
                             case ConnectionState.active:
                             case ConnectionState.done:
                               if (snapshot.hasData) {
-                                return PartChildren(title: widget.title, children: snapshot.data!);
+                                return PartChildren(
+                                  title: widget.title,
+                                  children: snapshot.data!,
+                                  parentId: widget.partId,
+                                  onPop: () {
+                                    setState(() {
+                                      _partChildrenFuture = PartRepository.getPartChildren(widget.partId);
+                                    });
+                                  },
+                                );
                               } else {
-                                return PartChildren(children: []);
+                                return Text('Data not set');
                               }
                           }
                         },

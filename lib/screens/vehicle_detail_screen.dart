@@ -66,6 +66,23 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
     );
   }
 
+  Future<void> _showDuplicatePartDialog(int? parentId) async {
+    await showDialog(
+      context: context,
+      builder:(context) {
+        return PartSelectionDialog(
+          onSelected: (part) async {
+            PartRepository.duplicatePartForVehicle(part.id, widget.vehicle.id);
+
+            setState(() {
+              _partsFuture = VehicleRepository.searchPart(widget.vehicle.id, parentId: parentId);
+            });
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -94,7 +111,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                   FloatingActionButton.small(
                     heroTag: null,
                     child: Icon(Icons.copy),
-                    onPressed: () => _showLinkPartDialog(vehicle.parentId),
+                    onPressed: () => _showDuplicatePartDialog(vehicle.parentId),
                   ),
                   FloatingActionButton(
                     heroTag: null,
@@ -196,7 +213,16 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                           if (snapshot.hasData) {
                             final parts = snapshot.data!;
 
-                            return VehiclePartFinder(title: vehicle.name, parts: parts);
+                            return VehiclePartFinder(
+                              title: vehicle.name,
+                              parts: parts,
+                              vehicleId: vehicle.id,
+                              onPop: () {
+                                setState(() {
+                                  _partsFuture = VehicleRepository.searchPart(widget.vehicle.id, parentId: vehicle.parentId);
+                                });
+                              },
+                            );
                           } else {
                             return Text('Data not set');
                           }

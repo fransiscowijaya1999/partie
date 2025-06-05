@@ -6,11 +6,15 @@ class VehiclePartFinder extends StatefulWidget {
   const VehiclePartFinder({
     super.key,
     required this.parts,
+    required this.vehicleId,
+    this.onPop,
     this.title = ''
   });
 
   final List<Part> parts;
+  final int vehicleId;
   final String title;
+  final VoidCallback? onPop;
 
   @override
   State<StatefulWidget> createState() => _VehiclePartFinderState();
@@ -58,7 +62,9 @@ class _VehiclePartFinderState extends State<VehiclePartFinder> {
         SizedBox(height: 20,),
         VehiclePartList(
           parts: parts,
+          vehicleId: widget.vehicleId,
           title: widget.title,
+          onPop: widget.onPop,
         )
       ]
     );

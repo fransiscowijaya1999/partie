@@ -46,6 +46,31 @@ class PartRepository {
     });
   }
 
+  static Future<void> duplicatePartForVehicle(int partId, int vehicleId) async {
+    return db.transaction(() async {
+      final part = await db.managers.parts.filter((f) => f.id.equals(partId)).getSingle();
+      final created = await db.managers.parts.create((p) => p(name: part.name, description: part.description));
+      await db.managers.partVehicles.create((pv) => pv(partId: created, vehicleId: vehicleId));
+    });
+  }
+
+  static Future<void> deletePart(int partId) async {
+    return db.transaction(() async {
+      await db.managers.parts.filter((f) => f.id.equals(partId)).delete();
+    });
+  }
+
+  static Future<void> unlinkPart(int partId, int vehicleId) async {
+    return db.transaction(() async {
+      await db.managers.partVehicles.filter((f) => f.partId.id.equals(partId) & f.vehicleId.id.equals(vehicleId)).delete();
+      final linkCount = await db.managers.partVehicles.filter((f) => f.partId.id.equals(partId)).count();
+
+      if (linkCount == 0) {
+        await db.managers.parts.filter((f) => f.id.equals(partId)).delete();
+      }
+    });
+  }
+
   static Stream<Part> getPartDetailStream(int id) {
     return db.managers.parts.filter((part) => part.id.equals(id)).watchSingle();
   }
