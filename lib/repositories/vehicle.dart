@@ -15,8 +15,11 @@ class VehicleRepository {
     return vehicles;
   }
 
-  static Stream<List<Vehicle>> filterWatch() {
-    return db.managers.vehicles.watch();
+  static Stream<List<Vehicle>> filterWatch({ String name = '', int limit = 10, int? ignoredId }) {
+    var query = db.managers.vehicles
+      .filter((f) => f.name.contains(name, caseInsensitive: true));
+
+    return query.watch(limit: limit);
   }
 
   static Future<void> createVehicle(String name, String description, { int? parentId }) async {

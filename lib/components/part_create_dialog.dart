@@ -4,9 +4,13 @@ import 'package:partie/components/vehicle_form.dart';
 class PartCreateDialog extends StatefulWidget {
   const PartCreateDialog({
     super.key,
-    required this.onCreate
+    required this.onCreate,
+    this.name = '',
+    this.description = ''
   });
 
+  final String name;
+  final String description;
   final Future Function(String name, String description) onCreate;
 
   @override
@@ -14,9 +18,17 @@ class PartCreateDialog extends StatefulWidget {
 }
 
 class _PartCreateDialogState extends State<PartCreateDialog> {
-  String name = '';
-  String description = '';
+  late String name;
+  late String description;
   bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    name = widget.name;
+    description = widget.description;
+  }
 
   void _setName(String text) {
     setState(() {
@@ -38,6 +50,8 @@ class _PartCreateDialogState extends State<PartCreateDialog> {
         VehicleForm(
           setName: _setName,
           setDescription: _setDesc,
+          name: name,
+          description: description,
         ),
         SizedBox(height: 10,),
         Row(

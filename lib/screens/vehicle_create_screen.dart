@@ -1,7 +1,7 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:partie/components/duplicate_list.dart';
-import 'package:partie/components/vehicle_form.dart';
+import 'package:partie/components/vehicle_form_reactive.dart';
 import 'package:partie/database.dart';
 import 'package:partie/repositories/vehicle.dart';
 
@@ -15,33 +15,37 @@ class VehicleCreateScreen extends StatefulWidget {
 class _VehicleCreateScreenState extends State<VehicleCreateScreen> {
   late Future<List<Vehicle>> _duplicates;
 
-  String name = '';
-  String description = '';
+  final nameController = TextEditingController();
+  final descriptionController = TextEditingController();
+
   Vehicle? selectedParent;
   final parentController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _duplicates = VehicleRepository.filter(name: name, limit: 5);
+
+    _duplicates = VehicleRepository.filter(name: nameController.text, limit: 5);
+    nameController.addListener(() {
+      setState(() {
+        _duplicates = VehicleRepository.filter(name: nameController.text, limit: 5);
+      });
+    });
+  }
+
+  void _resetForm() {
+    setState(() {
+      selectedParent = null;
+      nameController.text = '';
+      descriptionController.text = '';
+    });
   }
 
   Future<void> _submitVehicle() async {
     final parentId = selectedParent?.id;
-    await VehicleRepository.createVehicle(name, description, parentId: parentId);
-  }
+    await VehicleRepository.createVehicle(nameController.text, descriptionController.text, parentId: parentId);
 
-  void setName(String text) {
-    setState(() {
-      name = text;
-      _duplicates = VehicleRepository.filter(name: name, limit: 5);
-    });
-  }
-
-  void setDescription(String desc) {
-    setState(() {
-      description = desc;
-    });
+    _resetForm();
   }
 
   @override
@@ -54,7 +58,7 @@ class _VehicleCreateScreenState extends State<VehicleCreateScreen> {
           children: [
             SizedBox(
               height: 250,
-              child: name.length < 3 ?
+              child: nameController.text.length < 3 ?
                 Center(child: Text('Type atleast 3 characters name'),)
                 : FutureBuilder(
                   future: _duplicates,
@@ -102,10 +106,7 @@ class _VehicleCreateScreenState extends State<VehicleCreateScreen> {
               ),
             ),
             SizedBox(height: 10,),
-            VehicleForm(
-              setName: setName,
-              setDescription: setDescription,
-            ),
+            VehicleFormReactive(nameController: nameController, descriptionController: descriptionController),
             SizedBox(height: 10,),
             SizedBox(height: 10,),
             ElevatedButton(

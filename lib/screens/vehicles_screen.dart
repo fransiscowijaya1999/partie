@@ -16,12 +16,18 @@ class VehiclesScreen extends StatefulWidget {
 
 class _VehicleScreenState extends State<VehiclesScreen> {
   late Stream<List<Vehicle>> _vehiclesStream;
+  final queryController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
 
-    _vehiclesStream = VehicleRepository.filterWatch();
+    _vehiclesStream = VehicleRepository.filterWatch(name: queryController.text);
+    queryController.addListener(() {
+      setState(() {
+        _vehiclesStream = VehicleRepository.filterWatch(name: queryController.text);
+      });
+    });
   }
 
 
@@ -29,24 +35,41 @@ class _VehicleScreenState extends State<VehiclesScreen> {
   Widget build(BuildContext context) {
     return MainScaffold(
       title: 'Vehicle',
-      body: StreamBuilder<List<Vehicle>>(
-        stream: _vehiclesStream,
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.none:
-            case ConnectionState.waiting:
-              return Center(child: CircularProgressIndicator(),);
-            case ConnectionState.active:
-            case ConnectionState.done:
-              if (snapshot.hasData) {
-                final vehicles = snapshot.data!;
-
-                return VehicleList(vehicles: vehicles);
-              } else {
-                return VehicleList(vehicles: []);
-              }
-          }
-        },
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Card(
+                child: Padding(padding: EdgeInsets.all(10), child: TextField(
+                  controller: queryController,
+                  decoration: InputDecoration(
+                    label: Text('Search...')
+                  ),
+                ),),
+              ),
+            ),
+            StreamBuilder<List<Vehicle>>(
+              stream: _vehiclesStream,
+              builder: (context, snapshot) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.none:
+                  case ConnectionState.waiting:
+                    return Center(child: CircularProgressIndicator(),);
+                  case ConnectionState.active:
+                  case ConnectionState.done:
+                    if (snapshot.hasData) {
+                      final vehicles = snapshot.data!;
+            
+                      return VehicleList(vehicles: vehicles);
+                    } else {
+                      return VehicleList(vehicles: []);
+                    }
+                }
+              },
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

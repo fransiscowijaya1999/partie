@@ -18,6 +18,7 @@ class VehicleList extends StatelessWidget {
       return Center(child: Text('Vehicle not found'),);
     } else {
       return ListView.builder(
+        shrinkWrap: true,
         itemCount: vehicles!.length,
         itemBuilder: (context, index) {
           final vehicle = vehicles![index];

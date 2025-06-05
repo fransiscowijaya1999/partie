@@ -29,6 +29,12 @@ class PartRepository {
       await db.managers.partVehicles.create((pv) => pv(partId: created, vehicleId: vehicleId));
     });
   }
+  
+  static Future<void> updatePart(int partId, String name, String description) async {
+    await db.managers.parts
+      .filter((f) => f.id.equals(partId))
+      .update((p) => p(name: Value(name), description: Value(description)));
+  }
 
   static Future<void> createPartForPart(
     int partId,
