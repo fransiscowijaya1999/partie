@@ -84,15 +84,22 @@ class PartRepository {
   static Future<List<PartChild>> getPartChildren(int id) async {
     return await db.transaction(() async {
       final parts = await db.managers.parts.filter((part) => part.parentId.id.equals(id)).get();
-      final items = await db.managers.items
+      final items = await db.managers.partItems
         .withReferences(
-          (prefetch) => prefetch(partItemsRefs: true)
+          (prefetch) => prefetch(itemId: true)
         )
-        .filter((item) => item.partItemsRefs((f) => f.partId.id.equals(id))).get();
+        .filter((item) => item.partId.id.equals(id)).get();
 
       final children = [
-        ...items.map((i) => PartChild(id: i.$1.id, name: i.$1.name, isCategory: false)),
-        ...parts.map((p) => PartChild(id: p.id, isCategory: true, name: p.name))
+        ...items.map((i) => PartChild(
+          partId: id,
+          itemId: i.$2.itemId.prefetchedData?.firstOrNull?.id,
+          name: i.$2.itemId.prefetchedData?.firstOrNull?.name ?? 'unable to get name',
+          qty: i.$1.qty,
+          description: i.$1.description,
+          isCategory: false
+        )),
+        ...parts.map((p) => PartChild(partId: p.id, isCategory: true, name: p.name))
       ];
 
       children.sort((a, b) => a.name.compareTo(b.name));

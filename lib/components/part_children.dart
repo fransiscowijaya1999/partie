@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:partie/components/part_item_detail.dart';
 import 'package:partie/models/part_child.dart';
 import 'package:partie/screens/part_detail_screen.dart';
 import 'package:partie/utils/string_builder.dart';
@@ -31,23 +32,40 @@ class PartChildren extends StatelessWidget {
       itemCount: children.length,
       itemBuilder:(context, index) {
         final child = children[index];
-
-        return ListTile(
-          title: Text(child.name),
-          onTap: child.isCategory ? () async {
-            await Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => PartDetailScreen(
-                title: StringBuilder.titleBuilder(title, child.name),
-                partId: child.id,
-                parentId: parentId,
-                isVehiclePart: false,
-              )),
+          return Padding(
+            padding: EdgeInsets.only(left: 10, right: 10, bottom: index < children.length ? 10 : 0),
+            child: child.isCategory ?
+              PartItemDetail(
+                name: child.name,
+                onTap: child.isCategory ? () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => PartDetailScreen(
+                      title: StringBuilder.titleBuilder(title, child.name),
+                      partId: child.partId,
+                      parentId: parentId,
+                      isVehiclePart: false,
+                    )),
+                  );
+              
+                  onPop != null ? onPop!() : null;
+                } : null,
+              )
+              : Container(
+                decoration: BoxDecoration(
+                  color: Color.fromARGB(10, 0, 0, 0),
+                  border: Border.all(
+                    color: Colors.black38
+                  ),
+                  borderRadius: BorderRadius.all(Radius.circular(15))
+                ),
+                child: PartItemDetail(
+                  name: child.name,
+                  description: child.description,
+                  qty: child.qty,
+                ),
+              ),
             );
-
-            onPop != null ? onPop!() : null;
-          } : null,
-        );
-      },
+        }
     );
   }
 }

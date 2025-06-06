@@ -1,11 +1,17 @@
 class PartChild {
   const PartChild({
-    required this.id,
+    required this.partId,
     required this.isCategory,
-    required this.name
+    required this.name,
+    this.itemId,
+    this.qty = '',
+    this.description = ''
   });
 
-  final int id;
+  final int partId;
   final bool isCategory;
+  final int? itemId;
   final String name;
+  final String qty;
+  final String description;
 }
