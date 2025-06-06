@@ -1,66 +1,70 @@
 import 'package:flutter/material.dart';
 import 'package:partie/components/duplicate_list.dart';
-import 'package:partie/components/vehicle_form_reactive.dart';
+import 'package:partie/components/vehicle_form.dart';
 import 'package:partie/database.dart';
 import 'package:partie/repositories/item.dart';
 
-class ItemCreateScreen extends StatefulWidget {
-  const ItemCreateScreen({ super.key });
+class ItemEditScreen extends StatefulWidget {
+  const ItemEditScreen({
+    super.key,
+    required this.id,
+    this.name = '',
+    this.description = '',
+  });
+
+  final int id;
+  final String name;
+  final String description;
 
   @override
-  State<ItemCreateScreen> createState() => _ItemCreateScreenState();
+  State<ItemEditScreen> createState() => _ItemEditScreenState();
 }
 
-class _ItemCreateScreenState extends State<ItemCreateScreen> {
+class _ItemEditScreenState extends State<ItemEditScreen> {
   late Future<List<Item>> _duplicates;
-  final nameController = TextEditingController();
-  final descriptionController = TextEditingController();
 
-  void resetForm() {
-    setState(() {
-      nameController.text = '';
-      descriptionController.text = '';
-      setState(() {
-        _duplicates = ItemRepository.filter(name: nameController.text, limit: 5);
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    descriptionController.dispose();
-    super.dispose();
-  }
+  String name = '';
+  String description = '';
 
   @override
   void initState() {
     super.initState();
-    _duplicates = ItemRepository.filter(name: nameController.text, limit: 5);
-    nameController.addListener(() {
-      setState(() {
-        _duplicates = ItemRepository.filter(name: nameController.text, limit: 5);
-      });
+    name = widget.name;
+    description = widget.description;
+    _duplicates = ItemRepository.filter(name: name, limit: 5);
+  }
+
+  Future<void> _updateItem() async {
+    await ItemRepository.updateItem(widget.id, name, description);
+    if (mounted) {
+      Navigator.of(context).pop(Item(id: widget.id, name: name, description: description));
+    }
+  }
+
+  void setName(String text) {
+    setState(() {
+      name = text;
+      _duplicates = ItemRepository.filter(name: name, limit: 5);
     });
   }
 
-  Future<void> _submitItem() async {
-    await ItemRepository.createItem(nameController.text, descriptionController.text);
-
-    resetForm();
+  void setDescription(String desc) {
+    setState(() {
+      description = desc;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Create Item'),),
+      appBar: AppBar(title: Text('Edit Vehicle'),),
       body: Padding(
         padding: const EdgeInsets.all(10),
         child: Column(
           children: [
             SizedBox(
               height: 250,
-              child: nameController.text.length < 3 ?
+              child: name.length < 3 ?
                 Center(child: Text('Type atleast 3 characters name'),)
                 : FutureBuilder(
                   future: _duplicates,
@@ -83,13 +87,16 @@ class _ItemCreateScreenState extends State<ItemCreateScreen> {
                 )
             ),
             SizedBox(height: 10,),
-            VehicleFormReactive(
-              nameController: nameController,
-              descriptionController: descriptionController,
+            VehicleForm(
+              setName: setName,
+              setDescription: setDescription,
+              name: name,
+              description: description,
             ),
             SizedBox(height: 10,),
+            SizedBox(height: 10,),
             ElevatedButton(
-              onPressed: _submitItem,
+              onPressed: _updateItem,
               child: Text('Submit')
             )
           ],

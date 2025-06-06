@@ -40,4 +40,13 @@ class ItemRepository {
   static Future<void> createItem(String name, String description) async {
     await db.managers.items.create((o) => o(name: name, description: description));
   }
+
+  static Future<void> deleteItem(int id) async {
+    await db.managers.items.filter((f) => f.id.equals(id)).delete();
+  }
+
+  static Future<void> updateItem(int id, String name, String description) async {
+    await db.managers.items.filter((f) => f.id.equals(id))
+      .update((f) => f(name: Value(name), description: Value(description)));
+  }
 }
