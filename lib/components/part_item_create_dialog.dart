@@ -6,8 +6,15 @@ import 'package:partie/database.dart';
 class PartItemCreateDialog extends StatefulWidget {
   const PartItemCreateDialog({
     super.key,
-    required this.onCreate
+    required this.onCreate,
+    this.qty = '',
+    this.description = '',
+    this.item
   });
+
+  final String qty;
+  final String description;
+  final Item? item;
 
   final Future Function(int itemId, String name, String description) onCreate;
 
@@ -16,11 +23,19 @@ class PartItemCreateDialog extends StatefulWidget {
 }
 
 class _PartItemCreateDialogState extends State<PartItemCreateDialog> {
-  String qty = '';
-  String description = '';
+  late String qty;
+  late String description;
   Item? _selectedItem;
   
   bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    qty = widget.qty;
+    description = widget.description;
+    _selectedItem = widget.item;
+  }
 
   Future<void> _showItemSelectionDialog() async {
     await showDialog(
@@ -58,6 +73,8 @@ class _PartItemCreateDialogState extends State<PartItemCreateDialog> {
         PartItemForm(
           setQty: _setQty,
           setDescription: _setDesc,
+          qty: qty,
+          description: description,
         ),
         SizedBox(height: 10,),
         Row(

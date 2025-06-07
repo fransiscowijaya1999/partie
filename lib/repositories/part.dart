@@ -81,6 +81,21 @@ class PartRepository {
     return db.managers.parts.filter((part) => part.id.equals(id)).watchSingle();
   }
 
+  static Future<void> deleteItemFromPart(int partId, int? itemId) async {
+    return db.transaction(() async {
+      if (itemId != null) {        
+        await db.managers.partItems.filter((f) => f.partId.id.equals(partId) & f.itemId.id.equals(itemId)).delete();
+      } else {
+        await db.managers.partItems.filter((f) => f.partId.id.equals(partId) & f.itemId.id.isNull()).delete();
+      }
+    });
+  }
+
+  static Future<void> updatePartItem(int partId, int itemId, int newItemId, String qty, String description) async {
+    await db.managers.partItems.filter((f) => f.partId.id.equals(partId) & f.itemId.id.equals(itemId))
+      .update((f) => f(partId: Value(partId), itemId: Value(newItemId), qty: Value(qty), description: Value(description)));
+  }
+
   static Future<List<PartChild>> getPartChildren(int id) async {
     return await db.transaction(() async {
       final parts = await db.managers.parts.filter((part) => part.parentId.id.equals(id)).get();

@@ -4,11 +4,15 @@ class PartItemForm extends StatefulWidget {
   const PartItemForm({
     super.key,
     this.setQty,
-    this.setDescription
+    this.setDescription,
+    this.qty = '',
+    this.description = ''
   });
 
   final ValueSetter<String>? setQty;
   final ValueSetter<String>? setDescription;
+  final String qty;
+  final String description;
 
   @override
   State<PartItemForm> createState() => _PartItemFormState();
@@ -32,6 +36,8 @@ class _PartItemFormState extends State<PartItemForm> {
   void initState() {
     super.initState();
 
+    qtyController.text = widget.qty;
+    descriptionController.text = widget.description;
     qtyController.addListener(_setQty);
     descriptionController.addListener(_setDesc);
   }

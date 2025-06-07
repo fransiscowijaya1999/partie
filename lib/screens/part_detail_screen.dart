@@ -194,6 +194,20 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
                                       _partChildrenFuture = PartRepository.getPartChildren(widget.partId);
                                     });
                                   },
+                                  onItemDelete: (id) async {
+                                    await PartRepository.deleteItemFromPart(widget.partId, id);
+
+                                    setState(() {
+                                      _partChildrenFuture = PartRepository.getPartChildren(widget.partId);
+                                    });
+                                  },
+                                  onItemUpdated: (itemId, newItemId, qty, description) async {
+                                    await PartRepository.updatePartItem(widget.partId, itemId, newItemId, qty, description);
+
+                                    setState(() {
+                                      _partChildrenFuture = PartRepository.getPartChildren(widget.partId);
+                                    });
+                                  },
                                 );
                               } else {
                                 return Text('Data not set');

@@ -10,6 +10,8 @@ class PartChildren extends StatelessWidget {
     required this.children,
     required this.parentId,
     this.onPop,
+    this.onItemDelete,
+    this.onItemUpdated,
     this.title = ''
   });
 
@@ -17,6 +19,8 @@ class PartChildren extends StatelessWidget {
   final int parentId;
   final String title;
   final VoidCallback? onPop;
+  final ValueSetter<int?>? onItemDelete;
+  final Function(int itemId, int newItemId, String name, String description)? onItemUpdated;
 
   @override
   Widget build(BuildContext context) {
@@ -59,9 +63,18 @@ class PartChildren extends StatelessWidget {
                   borderRadius: BorderRadius.all(Radius.circular(15))
                 ),
                 child: PartItemDetail(
+                  itemId: child.itemId,
                   name: child.name,
                   description: child.description,
                   qty: child.qty,
+                  onItemDelete: () {
+                    if (onItemDelete != null) {
+                      onItemDelete!(child.itemId);
+                    }
+                  },
+                  onItemUpdated: (newItemId, qty, description) {
+                    if (onItemUpdated != null) onItemUpdated!(child.itemId!, newItemId, qty, description);
+                  },
                 ),
               ),
             );
