@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:partie/components/delete_confirmation_dialog.dart';
 import 'package:partie/components/part_item_create_dialog.dart';
 import 'package:partie/database.dart';
+import 'package:partie/screens/item_detail_screen_async.dart';
 
 class PartItemDetail extends StatelessWidget {
   const PartItemDetail({
@@ -62,12 +63,22 @@ class PartItemDetail extends StatelessWidget {
               ],
             ),
           ),
-          if (onItemDelete != null || onItemUpdated != null) Column(
+          if (onItemDelete != null || onItemUpdated != null || itemId != null) Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               PopupMenuButton(
                 itemBuilder:(context) {
                   return <PopupMenuEntry>[
+                    if (itemId != null) PopupMenuItem(
+                      child: Icon(Icons.info),
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => ItemDetailScreenAsync(
+                            itemId: itemId!,
+                          )),
+                        );
+                      },
+                    ),
                     if (onItemUpdated != null) PopupMenuItem(
                       onTap: itemId != null ? () async {
                         await showDialog(context: context, builder: (context) {
@@ -94,7 +105,7 @@ class PartItemDetail extends StatelessWidget {
                           onItemDelete!();
                         }
                       },
-                    )
+                    ),
                   ];
                 },
               ),
