@@ -19,6 +19,16 @@ class _ItemSelectionDialogState extends State<ItemSelectionDialog> {
 
   late Future<List<Item>> _future;
 
+  Future<void> _createItem() async {
+    final created = await ItemRepository.createItem(queryController.text, '');
+    final item = await db.managers.items.filter((f) => f.id.equals(created)).getSingle();
+
+    widget.onSelected(item);
+    if (mounted) {
+      Navigator.pop(context);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -42,8 +52,19 @@ class _ItemSelectionDialogState extends State<ItemSelectionDialog> {
     return SimpleDialog(
       title: Text('Select Item'),
       children: [
-        TextField(
-          controller: queryController,
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: queryController,
+              ),
+            ),
+            SizedBox(width: 10,),
+            ElevatedButton(
+              onPressed: queryController.text.length > 3 ? _createItem : null,
+              child: Icon(Icons.add
+            ))
+          ],
         ),
         SizedBox(height: 10,),
         SizedBox(

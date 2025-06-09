@@ -52,10 +52,29 @@ class PartRepository {
     });
   }
 
+  static Future<void> _duplicatePartChildren(int originId, int targetId) {
+    return db.transaction(() async {
+      final items = await db.managers.partItems.filter((f) => f.partId.id.equals(originId)).get();
+      final parts = await db.managers.parts.filter((f) => f.parentId.id.equals(originId)).get();
+
+      for (final item in items) {
+        await db.managers.partItems.create((f) => f(itemId: item.itemId, partId: targetId, qty: item.qty, description: item.description));
+      }
+
+      for (final part in parts) {
+        final created = await db.managers.parts.create((f) => f(parentId: Value(targetId), description: part.description, name: part.name));
+        await _duplicatePartChildren(part.id, created);
+      }
+    });
+  }
+
   static Future<void> duplicatePartForVehicle(int partId, int vehicleId) async {
     return db.transaction(() async {
       final part = await db.managers.parts.filter((f) => f.id.equals(partId)).getSingle();
       final created = await db.managers.parts.create((p) => p(name: part.name, description: part.description));
+
+      await _duplicatePartChildren(partId, created);
+      
       await db.managers.partVehicles.create((pv) => pv(partId: created, vehicleId: vehicleId));
     });
   }

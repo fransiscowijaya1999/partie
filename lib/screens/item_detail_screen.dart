@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:partie/components/delete_confirmation_dialog.dart';
+import 'package:partie/components/item_links_dialog.dart';
 import 'package:partie/database.dart';
 import 'package:partie/repositories/item.dart';
 import 'package:partie/screens/item_edit_screen.dart';
@@ -24,8 +25,11 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     item = widget.item;
     super.initState();
   }
-  void _showRelation() {
 
+  Future<void> _showRelation() async {
+    await showDialog(
+      context: context,
+      builder: (context) => ItemLinksDialog(itemId: widget.item.id, title: widget.item.name,));
   }
 
   Future<void> _editItem() async {
