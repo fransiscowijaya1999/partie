@@ -7,9 +7,7 @@ import 'package:partie/repositories/item.dart';
 import 'package:partie/screens/item_create_screen.dart';
 
 class ItemsScreen extends StatefulWidget {
-  const ItemsScreen({
-    super.key,
-  });
+  const ItemsScreen({super.key});
 
   @override
   State<ItemsScreen> createState() => _ItemsScreenState();
@@ -29,7 +27,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
     _itemsStream = ItemRepository.filterWithAggregateWatch(
       name: queryController.text,
       limit: 10,
-      page: page
+      page: page,
     );
 
     queryController.addListener(() {
@@ -39,12 +37,11 @@ class _ItemsScreenState extends State<ItemsScreen> {
         _itemsStream = ItemRepository.filterWithAggregateWatch(
           name: queryController.text,
           limit: 10,
-          page: page
+          page: page,
         );
       });
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -60,9 +57,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
                   padding: EdgeInsets.all(10),
                   child: TextField(
                     controller: queryController,
-                    decoration: InputDecoration(
-                      label: Text('Search')
-                    ),
+                    decoration: InputDecoration(label: Text('Search')),
                   ),
                 ),
               ),
@@ -73,7 +68,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
                 switch (snapshot.connectionState) {
                   case ConnectionState.none:
                   case ConnectionState.waiting:
-                    return Center(child: CircularProgressIndicator(),);
+                    return Center(child: CircularProgressIndicator());
                   case ConnectionState.active:
                   case ConnectionState.done:
                     if (snapshot.hasData) {
@@ -84,14 +79,13 @@ class _ItemsScreenState extends State<ItemsScreen> {
                 }
               },
             ),
-            SizedBox(height: 10,),
             StreamBuilder(
               stream: _itemsStream.count,
               builder: (context, snapshot) {
                 switch (snapshot.connectionState) {
                   case ConnectionState.none:
                   case ConnectionState.waiting:
-                    return Center(child: CircularProgressIndicator(),);
+                    return Center(child: CircularProgressIndicator());
                   case ConnectionState.active:
                   case ConnectionState.done:
                     if (snapshot.hasData) {
@@ -105,13 +99,14 @@ class _ItemsScreenState extends State<ItemsScreen> {
                           onMove: (step) {
                             setState(() {
                               page += step;
-                              _itemsStream = ItemRepository.filterWithAggregateWatch(
-                                name: queryController.text,
-                                limit: 10,
-                                page: page
-                              );
+                              _itemsStream =
+                                  ItemRepository.filterWithAggregateWatch(
+                                    name: queryController.text,
+                                    limit: 10,
+                                    page: page,
+                                  );
                             });
-                          }
+                          },
                         ),
                       );
                     } else {
@@ -120,7 +115,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
                 }
               },
             ),
-            SizedBox(height: 200,)
+            SizedBox(height: 200),
           ],
         ),
       ),

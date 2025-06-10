@@ -11,7 +11,7 @@ class VehicleEditScreen extends StatefulWidget {
     required this.id,
     this.name = '',
     this.description = '',
-    this.parentVehicle
+    this.parentVehicle,
   });
 
   final int id;
@@ -37,12 +37,21 @@ class _VehicleEditScreenState extends State<VehicleEditScreen> {
     name = widget.name;
     description = widget.description;
     selectedParent = widget.parentVehicle;
-    _duplicates = VehicleRepository.filter(name: name, limit: 5, ignoredId: widget.id);
+    _duplicates = VehicleRepository.filter(
+      name: name,
+      limit: 5,
+      ignoredId: widget.id,
+    );
   }
 
   Future<void> _updateVehicle() async {
     final parentId = selectedParent?.id;
-    await VehicleRepository.updateVehicle(widget.id, name, description, parentId: parentId);
+    await VehicleRepository.updateVehicle(
+      widget.id,
+      name,
+      description,
+      parentId: parentId,
+    );
     if (mounted) {
       Navigator.of(context).pop(parentId);
     }
@@ -51,7 +60,11 @@ class _VehicleEditScreenState extends State<VehicleEditScreen> {
   void setName(String text) {
     setState(() {
       name = text;
-      _duplicates = VehicleRepository.filter(name: name, limit: 5, ignoredId: widget.id);
+      _duplicates = VehicleRepository.filter(
+        name: name,
+        limit: 5,
+        ignoredId: widget.id,
+      );
     });
   }
 
@@ -64,79 +77,83 @@ class _VehicleEditScreenState extends State<VehicleEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Edit Vehicle'),),
+      appBar: AppBar(title: Text('Edit: ${widget.name}')),
       body: Padding(
         padding: const EdgeInsets.all(10),
         child: Column(
           children: [
             SizedBox(
               height: 250,
-              child: name.length < 3 ?
-                Center(child: Text('Type atleast 3 characters name'),)
-                : FutureBuilder(
-                  future: _duplicates,
-                  builder: (context, snapshot) {
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.none:
-                      case ConnectionState.active:
-                      case ConnectionState.waiting:
-                        return Center(child: CircularProgressIndicator(),);
-                      case ConnectionState.done:
-                        if (snapshot.hasData) {
-                          final duplicates = snapshot.data!.map((v) => v.name).toList();
+              child:
+                  name.length < 3
+                      ? Center(child: Text('Type atleast 3 characters name'))
+                      : FutureBuilder(
+                        future: _duplicates,
+                        builder: (context, snapshot) {
+                          switch (snapshot.connectionState) {
+                            case ConnectionState.none:
+                            case ConnectionState.active:
+                            case ConnectionState.waiting:
+                              return Center(child: CircularProgressIndicator());
+                            case ConnectionState.done:
+                              if (snapshot.hasData) {
+                                final duplicates =
+                                    snapshot.data!.map((v) => v.name).toList();
 
-                          return DuplicateList(duplicates: duplicates);
-                        } else {
-                          return DuplicateList(duplicates: []);
-                        }
-                    }
-                  },
-                )
+                                return DuplicateList(duplicates: duplicates);
+                              } else {
+                                return DuplicateList(duplicates: []);
+                              }
+                          }
+                        },
+                      ),
             ),
-            SizedBox(height: 10,),
+            SizedBox(height: 10),
             Card(
               child: Padding(
                 padding: EdgeInsets.all(10),
                 child: DropdownSearch<Vehicle>(
-                  items: (f, s) => VehicleRepository.filter(name: f, ignoredId: widget.id),
+                  items:
+                      (f, s) => VehicleRepository.filter(
+                        name: f,
+                        ignoredId: widget.id,
+                      ),
                   itemAsString: (item) => item.name,
                   selectedItem: selectedParent,
                   compareFn: (i, s) => i.id == s.id,
-                  onChanged: (value) => setState(() {
-                    selectedParent = value;
-                  }),
+                  onChanged:
+                      (value) => setState(() {
+                        selectedParent = value;
+                      }),
                   popupProps: PopupProps.bottomSheet(
                     searchDelay: Duration(milliseconds: 300),
                     disableFilter: true,
                     showSearchBox: true,
-                    itemBuilder: (context, item, isDisabled, isSelected) =>
-                      Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Text(item.name),
-                    ),
+                    itemBuilder:
+                        (context, item, isDisabled, isSelected) => Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Text(item.name),
+                        ),
                   ),
                   suffixProps: DropdownSuffixProps(
                     clearButtonProps: ClearButtonProps(
                       icon: Icon(Icons.restart_alt),
-                      isVisible: true
-                    )
+                      isVisible: true,
+                    ),
                   ),
-                )
+                ),
               ),
             ),
-            SizedBox(height: 10,),
+            SizedBox(height: 10),
             VehicleForm(
               setName: setName,
               setDescription: setDescription,
               name: name,
               description: description,
             ),
-            SizedBox(height: 10,),
-            SizedBox(height: 10,),
-            ElevatedButton(
-              onPressed: _updateVehicle,
-              child: Text('Submit')
-            )
+            SizedBox(height: 10),
+            SizedBox(height: 10),
+            ElevatedButton(onPressed: _updateVehicle, child: Text('Submit')),
           ],
         ),
       ),

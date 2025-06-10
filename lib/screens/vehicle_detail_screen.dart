@@ -10,10 +10,7 @@ import 'package:partie/repositories/vehicle.dart';
 import 'package:partie/screens/vehicle_edit_screen.dart';
 
 class VehicleDetailScreen extends StatefulWidget {
-  const VehicleDetailScreen({
-    super.key,
-    required this.vehicle
-  });
+  const VehicleDetailScreen({super.key, required this.vehicle});
 
   final Vehicle vehicle;
 
@@ -29,19 +26,29 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
   void initState() {
     super.initState();
     _vehicleFuture = VehicleRepository.getVehicleNotNull(widget.vehicle.id);
-    _partsFuture = VehicleRepository.searchPart(widget.vehicle.id, parentId: widget.vehicle.parentId);
+    _partsFuture = VehicleRepository.searchPart(
+      widget.vehicle.id,
+      parentId: widget.vehicle.parentId,
+    );
   }
 
   Future<void> _showCreatePartDialog(int? parentId) async {
     await showDialog(
       context: context,
-      builder:(context) {
+      builder: (context) {
         return PartCreateDialog(
           onCreate: (name, description) async {
-            await PartRepository.createPartForVehicle(widget.vehicle.id, name, description);
+            await PartRepository.createPartForVehicle(
+              widget.vehicle.id,
+              name,
+              description,
+            );
 
             setState(() {
-              _partsFuture = VehicleRepository.searchPart(widget.vehicle.id, parentId: parentId);
+              _partsFuture = VehicleRepository.searchPart(
+                widget.vehicle.id,
+                parentId: parentId,
+              );
             });
           },
         );
@@ -52,13 +59,16 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
   Future<void> _showLinkPartDialog(int? parentId) async {
     await showDialog(
       context: context,
-      builder:(context) {
+      builder: (context) {
         return PartSelectionDialog(
           onSelected: (part) async {
             PartRepository.linkPartForVehicle(part.id, widget.vehicle.id);
 
             setState(() {
-              _partsFuture = VehicleRepository.searchPart(widget.vehicle.id, parentId: parentId);
+              _partsFuture = VehicleRepository.searchPart(
+                widget.vehicle.id,
+                parentId: parentId,
+              );
             });
           },
         );
@@ -69,13 +79,16 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
   Future<void> _showDuplicatePartDialog(int? parentId) async {
     await showDialog(
       context: context,
-      builder:(context) {
+      builder: (context) {
         return PartSelectionDialog(
           onSelected: (part) async {
             PartRepository.duplicatePartForVehicle(part.id, widget.vehicle.id);
 
             setState(() {
-              _partsFuture = VehicleRepository.searchPart(widget.vehicle.id, parentId: parentId);
+              _partsFuture = VehicleRepository.searchPart(
+                widget.vehicle.id,
+                parentId: parentId,
+              );
             });
           },
         );
@@ -92,14 +105,12 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
           case ConnectionState.none:
           case ConnectionState.active:
           case ConnectionState.waiting:
-            return Scaffold(body: Center(child: CircularProgressIndicator(),));
+            return Scaffold(body: Center(child: CircularProgressIndicator()));
           case ConnectionState.done:
             final vehicle = snapshot.data!;
 
             return Scaffold(
-              appBar: AppBar(
-                title: Text(vehicle.name),
-              ),
+              appBar: AppBar(title: Text(vehicle.name)),
               floatingActionButtonLocation: ExpandableFab.location,
               floatingActionButton: ExpandableFab(
                 children: [
@@ -117,118 +128,174 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                     heroTag: null,
                     onPressed: () => _showCreatePartDialog(vehicle.parentId),
                     child: Icon(Icons.add),
-                  )
-                ]
+                  ),
+                ],
               ),
               body: SingleChildScrollView(
                 child: Column(
                   children: [
-                    Text(vehicle.name),
-                    vehicle.parentId != null ?
-                    FutureBuilder(
-                      future: vehicle.parentId != null ? VehicleRepository.getVehicle(vehicle.parentId!) : null,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          final parent = snapshot.data!;
-                          return Text('Inherit: ${parent.name}');
-                        } else {
-                          return Text('Error fetching data');
-                        }
-                      },
-                    )
-                    : Text('Inherit nothing'),
-                    vehicle.description.isEmpty ?
-                    Center(child: Text('No description yet.'),) :
-                    Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: SizedBox(
-                        height: 350,
-                        child: Card(
-                          color: Colors.white,
-                          child: SingleChildScrollView(
-                            child: Padding(
-                              padding: const EdgeInsets.all(15),
-                              child: MarkdownBlock(data: vehicle.description),
+                    Text(
+                      vehicle.name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                    if (vehicle.parentId != null) ...[
+                      SizedBox(height: 10),
+                      FutureBuilder(
+                        future:
+                            vehicle.parentId != null
+                                ? VehicleRepository.getVehicle(
+                                  vehicle.parentId!,
+                                )
+                                : null,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            final parent = snapshot.data!;
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: Colors.amber,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: Colors.black38,
+                                  width: 2,
+                                ),
+                              ),
+                              padding: EdgeInsets.all(5),
+                              child: Text(
+                                'Inherit: ${parent.name}',
+                                style: TextStyle(fontSize: 10),
+                              ),
+                            );
+                          } else {
+                            return Text('Error fetching data');
+                          }
+                        },
+                      ),
+                      SizedBox(height: 10),
+                    ],
+                    if (vehicle.description.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: SizedBox(
+                          height: 350,
+                          child: Card(
+                            color: Colors.white,
+                            child: SingleChildScrollView(
+                              child: Padding(
+                                padding: const EdgeInsets.all(15),
+                                child: MarkdownBlock(data: vehicle.description),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
+                    Divider(),
                     Padding(
-                      padding: const EdgeInsets.all(10),
+                      padding: EdgeInsets.all(10),
                       child: FutureBuilder(
-                        future: vehicle.parentId != null ? VehicleRepository.getVehicle(vehicle.parentId!) : null,
+                        future:
+                            vehicle.parentId != null
+                                ? VehicleRepository.getVehicle(
+                                  vehicle.parentId!,
+                                )
+                                : null,
                         builder: (context, snapshot) {
                           return Row(
                             children: [
                               Expanded(
                                 child: ElevatedButton(
                                   onPressed: () async {
-                                    final int? pId = await Navigator.of(context).push(
-                                      MaterialPageRoute(builder: (context) => VehicleEditScreen(
-                                        id: vehicle.id,
-                                        name: vehicle.name,
-                                        description: vehicle.description,
-                                        parentVehicle: snapshot.data,
-                                      )),
+                                    final int? pId = await Navigator.of(
+                                      context,
+                                    ).push(
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) => VehicleEditScreen(
+                                              id: vehicle.id,
+                                              name: vehicle.name,
+                                              description: vehicle.description,
+                                              parentVehicle: snapshot.data,
+                                            ),
+                                      ),
                                     );
 
                                     setState(() {
-                                      _vehicleFuture = VehicleRepository.getVehicleNotNull(widget.vehicle.id);
-                                      _partsFuture = VehicleRepository.searchPart(widget.vehicle.id, parentId: pId);
+                                      _vehicleFuture =
+                                          VehicleRepository.getVehicleNotNull(
+                                            widget.vehicle.id,
+                                          );
+                                      _partsFuture =
+                                          VehicleRepository.searchPart(
+                                            widget.vehicle.id,
+                                            parentId: pId,
+                                          );
                                     });
                                   },
-                                  child: Icon(Icons.edit)
+                                  child: Icon(Icons.edit),
                                 ),
                               ),
-                              SizedBox(width: 10,),
-                              ElevatedButton(onPressed: () async {
-                                await VehicleRepository.deleteVehicle(vehicle.id);
-                                if (context.mounted) {
-                                  Navigator.of(context).pop();
-                                }
-                              }, child: Icon(Icons.delete))
+                              SizedBox(width: 10),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  await VehicleRepository.deleteVehicle(
+                                    vehicle.id,
+                                  );
+                                  if (context.mounted) {
+                                    Navigator.of(context).pop();
+                                  }
+                                },
+                                child: Icon(Icons.delete),
+                              ),
                             ],
                           );
                         },
                       ),
                     ),
-                    SizedBox(height: 15,),
+                    Divider(),
                     Center(
-                      child: Text('Parts',
+                      child: Text(
+                        'Parts',
                         style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                    SizedBox(height: 10,),
-                    FutureBuilder(future: _partsFuture, builder: (context, snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.none:
-                        case ConnectionState.active:
-                        case ConnectionState.waiting:
-                          return Center(child: CircularProgressIndicator(),);
-                        case ConnectionState.done:
-                          if (snapshot.hasData) {
-                            final parts = snapshot.data!;
+                    SizedBox(height: 10),
+                    FutureBuilder(
+                      future: _partsFuture,
+                      builder: (context, snapshot) {
+                        switch (snapshot.connectionState) {
+                          case ConnectionState.none:
+                          case ConnectionState.active:
+                          case ConnectionState.waiting:
+                            return Center(child: CircularProgressIndicator());
+                          case ConnectionState.done:
+                            if (snapshot.hasData) {
+                              final parts = snapshot.data!;
 
-                            return VehiclePartFinder(
-                              title: vehicle.name,
-                              parts: parts,
-                              vehicleId: vehicle.id,
-                              onPop: () {
-                                setState(() {
-                                  _partsFuture = VehicleRepository.searchPart(widget.vehicle.id, parentId: vehicle.parentId);
-                                });
-                              },
-                            );
-                          } else {
-                            return Text('Data not set');
-                          }
-                      }
-                    }),
-                    SizedBox(height: 300,)
+                              return VehiclePartFinder(
+                                title: vehicle.name,
+                                parts: parts,
+                                vehicleId: vehicle.id,
+                                onPop: () {
+                                  setState(() {
+                                    _partsFuture = VehicleRepository.searchPart(
+                                      widget.vehicle.id,
+                                      parentId: vehicle.parentId,
+                                    );
+                                  });
+                                },
+                              );
+                            } else {
+                              return Text('Data not set');
+                            }
+                        }
+                      },
+                    ),
+                    SizedBox(height: 300),
                   ],
                 ),
               ),

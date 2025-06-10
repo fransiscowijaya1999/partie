@@ -88,30 +88,28 @@ class _ItemDetailScreenAsyncState extends State<ItemDetailScreenAsync> {
                   child: Column(
                     children: [
                       Center(child: Text(item.name)),
-                      Padding(
-                        padding: EdgeInsets.all(10),
-                        child: Row(
-                          children: [
-                            ElevatedButton(
-                              onPressed:
-                                  () => _showRelation(item.id, item.name),
-                              child: Icon(Icons.link),
+                      SizedBox(height: 10),
+                      Row(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () => _showRelation(item.id, item.name),
+                            child: Icon(Icons.link),
+                          ),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () => _editItem(item),
+                              child: Icon(Icons.edit),
                             ),
-                            SizedBox(width: 10),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () => _editItem(item),
-                                child: Icon(Icons.edit),
-                              ),
-                            ),
-                            SizedBox(width: 10),
-                            ElevatedButton(
-                              onPressed: () => _deleteItem(item.id),
-                              child: Icon(Icons.delete),
-                            ),
-                          ],
-                        ),
+                          ),
+                          SizedBox(width: 10),
+                          ElevatedButton(
+                            onPressed: () => _deleteItem(item.id),
+                            child: Icon(Icons.delete),
+                          ),
+                        ],
                       ),
+                      SizedBox(height: 5),
                       Divider(),
                       Expanded(
                         child:

@@ -8,7 +8,7 @@ class VehiclePartFinder extends StatefulWidget {
     required this.parts,
     required this.vehicleId,
     this.onPop,
-    this.title = ''
+    this.title = '',
   });
 
   final List<Part> parts;
@@ -27,10 +27,24 @@ class _VehiclePartFinderState extends State<VehiclePartFinder> {
   @override
   void initState() {
     super.initState();
-    parts = widget.parts.where((part) => part.name.toUpperCase().contains(queryController.text.toUpperCase())).toList();
+    parts =
+        widget.parts
+            .where(
+              (part) => part.name.toUpperCase().contains(
+                queryController.text.toUpperCase(),
+              ),
+            )
+            .toList();
     queryController.addListener(() {
       setState(() {
-        parts = widget.parts.where((part) => part.name.toUpperCase().contains(queryController.text.toUpperCase())).toList();
+        parts =
+            widget.parts
+                .where(
+                  (part) => part.name.toUpperCase().contains(
+                    queryController.text.toUpperCase(),
+                  ),
+                )
+                .toList();
       });
     });
   }
@@ -52,21 +66,19 @@ class _VehiclePartFinderState extends State<VehiclePartFinder> {
               padding: const EdgeInsets.all(10),
               child: TextField(
                 controller: queryController,
-                decoration: InputDecoration(
-                  label: Text('Search...')
-                ),
+                decoration: InputDecoration(label: Text('Search...')),
               ),
             ),
           ),
         ),
-        SizedBox(height: 20,),
+        SizedBox(height: 10),
         VehiclePartList(
           parts: parts,
           vehicleId: widget.vehicleId,
           title: widget.title,
           onPop: widget.onPop,
-        )
-      ]
+        ),
+      ],
     );
   }
 }

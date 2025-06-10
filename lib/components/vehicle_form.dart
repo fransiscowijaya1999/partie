@@ -63,7 +63,7 @@ class _VehicleFormState extends State<VehicleForm> {
               controller: nameController,
               decoration: decorationGenerator('Name'),
             ),
-            SizedBox(height: 5),
+            SizedBox(height: 10),
             Card(
               color: Colors.white,
               child: Padding(
