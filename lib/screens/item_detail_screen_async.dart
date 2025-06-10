@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:partie/components/delete_confirmation_dialog.dart';
+import 'package:partie/components/item_links_dialog.dart';
 import 'package:partie/database.dart';
 import 'package:partie/repositories/item.dart';
 import 'package:partie/screens/item_edit_screen.dart';
 
 class ItemDetailScreenAsync extends StatefulWidget {
-  const ItemDetailScreenAsync({
-    super.key,
-    required this.itemId
-  });
+  const ItemDetailScreenAsync({super.key, required this.itemId});
 
   final int itemId;
 
@@ -20,30 +18,47 @@ class ItemDetailScreenAsync extends StatefulWidget {
 class _ItemDetailScreenAsyncState extends State<ItemDetailScreenAsync> {
   late Future<Item> _itemFuture;
 
-  @override void initState() {
-    _itemFuture = db.managers.items.filter((f) => f.id.equals(widget.itemId)).getSingle();
+  @override
+  void initState() {
+    _itemFuture =
+        db.managers.items.filter((f) => f.id.equals(widget.itemId)).getSingle();
     super.initState();
   }
-  void _showRelation() {
 
+  Future<void> _showRelation(int id, String name) async {
+    await showDialog(
+      context: context,
+      builder: (context) => ItemLinksDialog(itemId: id, title: name),
+    );
   }
 
   Future<void> _editItem(Item item) async {
-    final Item updated = await Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => ItemEditScreen(
-        id: item.id,
-        name: item.name,
-        description: item.description
-      )),
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder:
+            (context) => ItemEditScreen(
+              id: item.id,
+              name: item.name,
+              description: item.description,
+            ),
+      ),
     );
 
     setState(() {
-      item = updated;
+      _itemFuture =
+          db.managers.items
+              .filter((f) => f.id.equals(widget.itemId))
+              .getSingle();
     });
   }
 
   Future<void> _deleteItem(int id) async {
-    final confirm = await showDialog(context: context, builder: (context) => DeleteConfirmationDialog()) ?? false;
+    final confirm =
+        await showDialog(
+          context: context,
+          builder: (context) => DeleteConfirmationDialog(),
+        ) ??
+        false;
 
     if (confirm) {
       await ItemRepository.deleteItem(id);
@@ -61,65 +76,75 @@ class _ItemDetailScreenAsyncState extends State<ItemDetailScreenAsync> {
         switch (snapshot.connectionState) {
           case ConnectionState.none:
           case ConnectionState.waiting:
-            return Scaffold(body: Center(child: CircularProgressIndicator(),));
+            return Scaffold(body: Center(child: CircularProgressIndicator()));
           case ConnectionState.active:
           case ConnectionState.done:
             if (snapshot.hasData) {
               final item = snapshot.data!;
               return Scaffold(
-                appBar: AppBar(
-                  title: Text(item.name),
-                ),
+                appBar: AppBar(title: Text(item.name)),
                 body: Padding(
                   padding: const EdgeInsets.all(10),
                   child: Column(
                     children: [
-                      Center(
-                        child: Text(item.name),
-                      ),
-                      Padding(padding: EdgeInsets.all(10), child: Row(
-                        children: [
-                          ElevatedButton(
-                            onPressed: _showRelation,
-                            child: Icon(Icons.link)
-                          ),
-                          SizedBox(width: 10,),
-                          Expanded(child: ElevatedButton(
-                            onPressed: () => _editItem(item),
-                            child: Icon(Icons.edit)
-                          )),
-                          SizedBox(width: 10,),
-                          ElevatedButton(
-                            onPressed: () => _deleteItem(item.id),
-                            child: Icon(Icons.delete)
-                          )
-                        ],
-                      ),),
-                      SizedBox(height: 10,),
-                      Expanded(
-                        child: item.description.isEmpty ?
-                          Center(child: Text('No description yet.'),) :
-                          Card(
-                            color: Colors.white,
-                            child: Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: SingleChildScrollView(
-                                child: MarkdownBlock(data: item.description),
+                      Center(child: Text(item.name)),
+                      Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Row(
+                          children: [
+                            ElevatedButton(
+                              onPressed:
+                                  () => _showRelation(item.id, item.name),
+                              child: Icon(Icons.link),
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () => _editItem(item),
+                                child: Icon(Icons.edit),
                               ),
                             ),
-                          ),
+                            SizedBox(width: 10),
+                            ElevatedButton(
+                              onPressed: () => _deleteItem(item.id),
+                              child: Icon(Icons.delete),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Divider(),
+                      Expanded(
+                        child:
+                            item.description.isEmpty
+                                ? Center(child: Text('No description yet.'))
+                                : Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Card(
+                                        color: Colors.white,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(10),
+                                          child: SingleChildScrollView(
+                                            child: MarkdownBlock(
+                                              data: item.description,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                       ),
                     ],
                   ),
                 ),
               );
-          } else {
-            return Scaffold(
-              body: Center(child: Text('Data not set'),),
-            );
-          }
+            } else {
+              return Scaffold(body: Center(child: Text('Data not set')));
+            }
         }
-      }
+      },
     );
   }
 }

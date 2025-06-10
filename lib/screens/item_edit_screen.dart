@@ -31,20 +31,30 @@ class _ItemEditScreenState extends State<ItemEditScreen> {
     super.initState();
     name = widget.name;
     description = widget.description;
-    _duplicates = ItemRepository.filter(name: name, limit: 5);
+    _duplicates = ItemRepository.filter(
+      name: name,
+      limit: 5,
+      ignoredId: widget.id,
+    );
   }
 
   Future<void> _updateItem() async {
     await ItemRepository.updateItem(widget.id, name, description);
     if (mounted) {
-      Navigator.of(context).pop(Item(id: widget.id, name: name, description: description));
+      Navigator.of(
+        context,
+      ).pop(Item(id: widget.id, name: name, description: description));
     }
   }
 
   void setName(String text) {
     setState(() {
       name = text;
-      _duplicates = ItemRepository.filter(name: name, limit: 5);
+      _duplicates = ItemRepository.filter(
+        name: name,
+        limit: 5,
+        ignoredId: widget.id,
+      );
     });
   }
 
@@ -57,48 +67,48 @@ class _ItemEditScreenState extends State<ItemEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Edit Vehicle'),),
+      appBar: AppBar(
+        title: Text('Edit: ${widget.name}', style: TextStyle(fontSize: 12)),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(10),
         child: Column(
           children: [
             SizedBox(
               height: 250,
-              child: name.length < 3 ?
-                Center(child: Text('Type atleast 3 characters name'),)
-                : FutureBuilder(
-                  future: _duplicates,
-                  builder: (context, snapshot) {
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.none:
-                      case ConnectionState.active:
-                      case ConnectionState.waiting:
-                        return Center(child: CircularProgressIndicator(),);
-                      case ConnectionState.done:
-                        if (snapshot.hasData) {
-                          final duplicates = snapshot.data!.map((v) => v.name).toList();
+              child:
+                  name.length < 3
+                      ? Center(child: Text('Type atleast 3 characters name'))
+                      : FutureBuilder(
+                        future: _duplicates,
+                        builder: (context, snapshot) {
+                          switch (snapshot.connectionState) {
+                            case ConnectionState.none:
+                            case ConnectionState.active:
+                            case ConnectionState.waiting:
+                              return Center(child: CircularProgressIndicator());
+                            case ConnectionState.done:
+                              if (snapshot.hasData) {
+                                final duplicates =
+                                    snapshot.data!.map((v) => v.name).toList();
 
-                          return DuplicateList(duplicates: duplicates);
-                        } else {
-                          return DuplicateList(duplicates: []);
-                        }
-                    }
-                  },
-                )
+                                return DuplicateList(duplicates: duplicates);
+                              } else {
+                                return DuplicateList(duplicates: []);
+                              }
+                          }
+                        },
+                      ),
             ),
-            SizedBox(height: 10,),
+            SizedBox(height: 10),
             VehicleForm(
               setName: setName,
               setDescription: setDescription,
               name: name,
               description: description,
             ),
-            SizedBox(height: 10,),
-            SizedBox(height: 10,),
-            ElevatedButton(
-              onPressed: _updateItem,
-              child: Text('Submit')
-            )
+            SizedBox(height: 10),
+            ElevatedButton(onPressed: _updateItem, child: Text('Submit')),
           ],
         ),
       ),

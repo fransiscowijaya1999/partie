@@ -9,12 +9,16 @@ class PartItemCreateDialog extends StatefulWidget {
     required this.onCreate,
     this.qty = '',
     this.description = '',
-    this.item
+    this.item,
+    this.title = 'Assign Item',
+    this.buttonText = 'Assign',
   });
 
   final String qty;
   final String description;
   final Item? item;
+  final String title;
+  final String buttonText;
 
   final Future Function(int itemId, String name, String description) onCreate;
 
@@ -26,7 +30,7 @@ class _PartItemCreateDialogState extends State<PartItemCreateDialog> {
   late String qty;
   late String description;
   Item? _selectedItem;
-  
+
   bool isLoading = false;
 
   @override
@@ -40,11 +44,12 @@ class _PartItemCreateDialogState extends State<PartItemCreateDialog> {
   Future<void> _showItemSelectionDialog() async {
     await showDialog(
       context: context,
-      builder:(context) {
+      builder: (context) {
         return ItemSelectionDialog(
-          onSelected: (item) => setState(() {
-            _selectedItem = item;
-          }),
+          onSelected:
+              (item) => setState(() {
+                _selectedItem = item;
+              }),
         );
       },
     );
@@ -65,35 +70,53 @@ class _PartItemCreateDialogState extends State<PartItemCreateDialog> {
   @override
   Widget build(BuildContext context) {
     return SimpleDialog(
-      title: Text('Assign Item'),
+      title: Text(widget.title),
       contentPadding: EdgeInsets.all(10),
       children: [
-        ElevatedButton(onPressed: _showItemSelectionDialog, child: _selectedItem != null ? Text(_selectedItem!.name) : Text('Select item')),
-        SizedBox(height: 10,),
+        ElevatedButton(
+          onPressed: _showItemSelectionDialog,
+          child:
+              _selectedItem != null
+                  ? Text(_selectedItem!.name)
+                  : Text('Select item'),
+        ),
+        SizedBox(height: 10),
         PartItemForm(
           setQty: _setQty,
           setDescription: _setDesc,
           qty: qty,
           description: description,
         ),
-        SizedBox(height: 10,),
+        SizedBox(height: 10),
         Row(
           children: [
             TextButton(
-              onPressed: isLoading || _selectedItem == null ? null : () async {
-                await widget.onCreate(_selectedItem!.id, qty, description);
-                if (context.mounted) {
-                  Navigator.pop(context, null);
-                }
-              },
-              child: isLoading ? Center(child: CircularProgressIndicator(),) : Text('Assign')
+              onPressed:
+                  isLoading || _selectedItem == null
+                      ? null
+                      : () async {
+                        await widget.onCreate(
+                          _selectedItem!.id,
+                          qty,
+                          description,
+                        );
+                        if (context.mounted) {
+                          Navigator.pop(context, null);
+                        }
+                      },
+              child:
+                  isLoading
+                      ? Center(child: CircularProgressIndicator())
+                      : Text(widget.buttonText),
             ),
             TextButton(
-              onPressed: () { Navigator.pop(context, null); },
-              child: Icon(Icons.cancel)
-            )
+              onPressed: () {
+                Navigator.pop(context, null);
+              },
+              child: Icon(Icons.cancel),
+            ),
           ],
-        )
+        ),
       ],
     );
   }

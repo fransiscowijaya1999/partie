@@ -6,11 +6,15 @@ class PartCreateDialog extends StatefulWidget {
     super.key,
     required this.onCreate,
     this.name = '',
-    this.description = ''
+    this.description = '',
+    this.title = 'Create Part',
+    this.buttonText = 'Create',
   });
 
   final String name;
   final String description;
+  final String title;
+  final String buttonText;
   final Future Function(String name, String description) onCreate;
 
   @override
@@ -45,7 +49,7 @@ class _PartCreateDialogState extends State<PartCreateDialog> {
   @override
   Widget build(BuildContext context) {
     return SimpleDialog(
-      title: Text('Create Part'),
+      title: Text(widget.title),
       children: [
         VehicleForm(
           setName: _setName,
@@ -53,24 +57,32 @@ class _PartCreateDialogState extends State<PartCreateDialog> {
           name: name,
           description: description,
         ),
-        SizedBox(height: 10,),
+        SizedBox(height: 10),
         Row(
           children: [
             TextButton(
-              onPressed: isLoading ? null : () async {
-                await widget.onCreate(name, description);
-                if (context.mounted) {
-                  Navigator.pop(context, null);
-                }
-              },
-              child: isLoading ? Center(child: CircularProgressIndicator(),) : Text('Create')
+              onPressed:
+                  isLoading
+                      ? null
+                      : () async {
+                        await widget.onCreate(name, description);
+                        if (context.mounted) {
+                          Navigator.pop(context, null);
+                        }
+                      },
+              child:
+                  isLoading
+                      ? Center(child: CircularProgressIndicator())
+                      : Text(widget.buttonText),
             ),
             TextButton(
-              onPressed: () { Navigator.pop(context, null); },
-              child: Icon(Icons.cancel)
-            )
+              onPressed: () {
+                Navigator.pop(context, null);
+              },
+              child: Icon(Icons.cancel),
+            ),
           ],
-        )
+        ),
       ],
     );
   }

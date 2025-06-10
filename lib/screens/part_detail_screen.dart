@@ -15,7 +15,7 @@ class PartDetailScreen extends StatefulWidget {
     required this.title,
     required this.parentId,
     required this.partId,
-    this.isVehiclePart = true
+    this.isVehiclePart = true,
   });
 
   final String title;
@@ -35,13 +35,19 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
   Future<void> _showCreatePartDialog() async {
     await showDialog(
       context: context,
-      builder:(context) {
+      builder: (context) {
         return PartCreateDialog(
           onCreate: (name, description) async {
-            await PartRepository.createPartForPart(widget.partId, name, description);
+            await PartRepository.createPartForPart(
+              widget.partId,
+              name,
+              description,
+            );
             setState(() {
               _partStream = PartRepository.getPartDetailStream(widget.partId);
-              _partChildrenFuture = PartRepository.getPartChildren(widget.partId);
+              _partChildrenFuture = PartRepository.getPartChildren(
+                widget.partId,
+              );
             });
           },
         );
@@ -49,11 +55,16 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
     );
   }
 
-  Future<void> _showEditPartDialog(String initName, String initDescription) async {
+  Future<void> _showEditPartDialog(
+    String initName,
+    String initDescription,
+  ) async {
     await showDialog(
       context: context,
-      builder:(context) {
+      builder: (context) {
         return PartCreateDialog(
+          title: 'Edit: $initName',
+          buttonText: 'Update',
           name: initName,
           description: initDescription,
           onCreate: (name, description) async {
@@ -65,7 +76,9 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
             setState(() {
               title = StringBuilder.titleBuilder(seperated.join(" \\ "), name);
               _partStream = PartRepository.getPartDetailStream(widget.partId);
-              _partChildrenFuture = PartRepository.getPartChildren(widget.partId);
+              _partChildrenFuture = PartRepository.getPartChildren(
+                widget.partId,
+              );
             });
           },
         );
@@ -76,13 +89,20 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
   Future<void> _showAssignItemDialog() async {
     await showDialog(
       context: context,
-      builder:(context) {
+      builder: (context) {
         return PartItemCreateDialog(
           onCreate: (itemId, qty, description) async {
-            await PartRepository.assignItemToPart(widget.partId, itemId, qty, description);
+            await PartRepository.assignItemToPart(
+              widget.partId,
+              itemId,
+              qty,
+              description,
+            );
             setState(() {
               _partStream = PartRepository.getPartDetailStream(widget.partId);
-              _partChildrenFuture = PartRepository.getPartChildren(widget.partId);
+              _partChildrenFuture = PartRepository.getPartChildren(
+                widget.partId,
+              );
             });
           },
         );
@@ -102,9 +122,7 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-      ),
+      appBar: AppBar(title: Text(title, style: TextStyle(fontSize: 12))),
       floatingActionButtonLocation: ExpandableFab.location,
       floatingActionButton: ExpandableFab(
         children: [
@@ -117,8 +135,8 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
             heroTag: null,
             onPressed: _showCreatePartDialog,
             child: Icon(Icons.category),
-          )
-        ]
+          ),
+        ],
       ),
       body: StreamBuilder<Part>(
         stream: _partStream,
@@ -126,7 +144,7 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
           switch (snapshot.connectionState) {
             case ConnectionState.none:
             case ConnectionState.waiting:
-              return Center(child: CircularProgressIndicator(),);
+              return Center(child: CircularProgressIndicator());
             case ConnectionState.active:
             case ConnectionState.done:
               if (snapshot.hasData) {
@@ -136,32 +154,45 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
                   child: Column(
                     children: [
                       Text(part.name),
-                      part.description.isNotEmpty ? Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: SizedBox(
-                          height: 250,
-                          child: Card(
-                            color: Colors.white, 
-                            child: SingleChildScrollView(
-                              child: Padding(
-                                padding: const EdgeInsets.all(15),
-                                child: MarkdownBlock(data: part.description),
+                      part.description.isNotEmpty
+                          ? Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: SizedBox(
+                              height: 250,
+                              child: Card(
+                                color: Colors.white,
+                                child: SingleChildScrollView(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(15),
+                                    child: MarkdownBlock(
+                                      data: part.description,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                      ) : SizedBox(height: 10),
-                      SizedBox(height: 10,),
+                          )
+                          : SizedBox(height: 10),
+                      SizedBox(height: 10),
                       Row(
                         children: [
-                          Expanded(child: ElevatedButton(
-                            onPressed: () => _showEditPartDialog(part.name, part.description),
-                            child: Icon(Icons.edit))
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed:
+                                  () => _showEditPartDialog(
+                                    part.name,
+                                    part.description,
+                                  ),
+                              child: Icon(Icons.edit),
+                            ),
                           ),
                           ElevatedButton(
                             onPressed: () async {
                               if (widget.isVehiclePart) {
-                                await PartRepository.unlinkPart(part.id, widget.parentId);
+                                await PartRepository.unlinkPart(
+                                  part.id,
+                                  widget.parentId,
+                                );
                               } else {
                                 await PartRepository.deletePart(part.id);
                               }
@@ -170,18 +201,18 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
                                 Navigator.of(context).pop();
                               }
                             },
-                            child: Icon(Icons.delete)
-                          )
+                            child: Icon(Icons.delete),
+                          ),
                         ],
                       ),
-                      SizedBox(height: 10,),
+                      SizedBox(height: 10),
                       FutureBuilder(
                         future: _partChildrenFuture,
                         builder: (context, snapshot) {
                           switch (snapshot.connectionState) {
                             case ConnectionState.none:
                             case ConnectionState.waiting:
-                              return Center(child: CircularProgressIndicator(),);
+                              return Center(child: CircularProgressIndicator());
                             case ConnectionState.active:
                             case ConnectionState.done:
                               if (snapshot.hasData) {
@@ -191,21 +222,44 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
                                   parentId: widget.partId,
                                   onPop: () {
                                     setState(() {
-                                      _partChildrenFuture = PartRepository.getPartChildren(widget.partId);
+                                      _partChildrenFuture =
+                                          PartRepository.getPartChildren(
+                                            widget.partId,
+                                          );
                                     });
                                   },
                                   onItemDelete: (id) async {
-                                    await PartRepository.deleteItemFromPart(widget.partId, id);
+                                    await PartRepository.deleteItemFromPart(
+                                      widget.partId,
+                                      id,
+                                    );
 
                                     setState(() {
-                                      _partChildrenFuture = PartRepository.getPartChildren(widget.partId);
+                                      _partChildrenFuture =
+                                          PartRepository.getPartChildren(
+                                            widget.partId,
+                                          );
                                     });
                                   },
-                                  onItemUpdated: (itemId, newItemId, qty, description) async {
-                                    await PartRepository.updatePartItem(widget.partId, itemId, newItemId, qty, description);
+                                  onItemUpdated: (
+                                    itemId,
+                                    newItemId,
+                                    qty,
+                                    description,
+                                  ) async {
+                                    await PartRepository.updatePartItem(
+                                      widget.partId,
+                                      itemId,
+                                      newItemId,
+                                      qty,
+                                      description,
+                                    );
 
                                     setState(() {
-                                      _partChildrenFuture = PartRepository.getPartChildren(widget.partId);
+                                      _partChildrenFuture =
+                                          PartRepository.getPartChildren(
+                                            widget.partId,
+                                          );
                                     });
                                   },
                                 );
@@ -214,12 +268,12 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
                               }
                           }
                         },
-                      )
-                    ]
+                      ),
+                    ],
                   ),
                 );
               } else {
-                return Center(child: Text('Part not set'),);
+                return Center(child: Text('Part not set'));
               }
           }
         },
@@ -227,4 +281,3 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
     );
   }
 }
-

@@ -7,10 +7,7 @@ import 'package:partie/repositories/item.dart';
 import 'package:partie/screens/item_edit_screen.dart';
 
 class ItemDetailScreen extends StatefulWidget {
-  const ItemDetailScreen({
-    super.key,
-    required this.item
-  });
+  const ItemDetailScreen({super.key, required this.item});
 
   final Item item;
 
@@ -21,7 +18,8 @@ class ItemDetailScreen extends StatefulWidget {
 class _ItemDetailScreenState extends State<ItemDetailScreen> {
   late Item item;
 
-  @override void initState() {
+  @override
+  void initState() {
     item = widget.item;
     super.initState();
   }
@@ -29,25 +27,38 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   Future<void> _showRelation() async {
     await showDialog(
       context: context,
-      builder: (context) => ItemLinksDialog(itemId: widget.item.id, title: widget.item.name,));
+      builder:
+          (context) =>
+              ItemLinksDialog(itemId: widget.item.id, title: widget.item.name),
+    );
   }
 
   Future<void> _editItem() async {
-    final Item updated = await Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => ItemEditScreen(
-        id: widget.item.id,
-        name: widget.item.name,
-        description: widget.item.description
-      )),
+    final Item? updated = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder:
+            (context) => ItemEditScreen(
+              id: widget.item.id,
+              name: widget.item.name,
+              description: widget.item.description,
+            ),
+      ),
     );
 
-    setState(() {
-      item = updated;
-    });
+    if (updated != null) {
+      setState(() {
+        item = updated;
+      });
+    }
   }
 
   Future<void> _deleteItem() async {
-    final confirm = await showDialog(context: context, builder: (context) => DeleteConfirmationDialog()) ?? false;
+    final confirm =
+        await showDialog(
+          context: context,
+          builder: (context) => DeleteConfirmationDialog(),
+        ) ??
+        false;
 
     if (confirm) {
       await ItemRepository.deleteItem(widget.item.id);
@@ -60,51 +71,53 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(item.name),
-      ),
+      appBar: AppBar(title: Text(item.name)),
       body: Padding(
         padding: const EdgeInsets.all(10),
         child: Column(
           children: [
-            Center(
-              child: Text(item.name),
-            ),
-            Padding(padding: EdgeInsets.all(10), child: Row(
-              children: [
-                ElevatedButton(
-                  onPressed: _showRelation,
-                  child: Icon(Icons.link)
-                ),
-                SizedBox(width: 10,),
-                Expanded(child: ElevatedButton(
-                  onPressed: _editItem,
-                  child: Icon(Icons.edit)
-                )),
-                SizedBox(width: 10,),
-                ElevatedButton(
-                  onPressed: _deleteItem,
-                  child: Icon(Icons.delete)
-                )
-              ],
-            ),),
-            SizedBox(height: 10,),
-            Expanded(
-              child: item.description.isEmpty ?
-                Center(child: Text('No description yet.'),) :
-                Card(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: SingleChildScrollView(
-                      child: MarkdownBlock(data: item.description),
+            Center(child: Text(item.name)),
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: Row(
+                children: [
+                  ElevatedButton(
+                    onPressed: _showRelation,
+                    child: Icon(Icons.link),
+                  ),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _editItem,
+                      child: Icon(Icons.edit),
                     ),
                   ),
-                ),
+                  SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: _deleteItem,
+                    child: Icon(Icons.delete),
+                  ),
+                ],
+              ),
+            ),
+            Divider(),
+            Expanded(
+              child:
+                  item.description.isEmpty
+                      ? Center(child: Text('No description yet.'))
+                      : Card(
+                        color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: SingleChildScrollView(
+                            child: MarkdownBlock(data: item.description),
+                          ),
+                        ),
+                      ),
             ),
           ],
         ),
       ),
-    );   
+    );
   }
 }

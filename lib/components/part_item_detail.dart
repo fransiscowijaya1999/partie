@@ -13,7 +13,7 @@ class PartItemDetail extends StatelessWidget {
     this.description = '',
     this.onTap,
     this.onItemDelete,
-    this.onItemUpdated
+    this.onItemUpdated,
   });
 
   final int? itemId;
@@ -35,85 +35,117 @@ class PartItemDetail extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(name),
-                SizedBox(height: 5,),
-                if (qty.isNotEmpty) Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      width: 2,
-                      color: Colors.black38
+                SizedBox(height: 5),
+                if (qty.isNotEmpty)
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(width: 2, color: Colors.black38),
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                      color: Colors.lightBlueAccent,
                     ),
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    color: Colors.lightBlueAccent
-                  ),
-                  padding: EdgeInsets.all(5),
-                  child: Text(qty,
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12
+                    padding: EdgeInsets.all(5),
+                    child: Text(
+                      qty,
+                      style: TextStyle(
+                        color: Colors.black54,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
-                ),
-                if (description.isNotEmpty) Text(description,
-                  style: TextStyle(
-                    color: Colors.black54,
-                    fontSize: 15
-                  )
-                )
+                if (description.isNotEmpty)
+                  Text(
+                    description,
+                    style: TextStyle(color: Colors.black54, fontSize: 15),
+                  ),
               ],
             ),
           ),
-          if (onItemDelete != null || onItemUpdated != null || itemId != null) Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              PopupMenuButton(
-                itemBuilder:(context) {
-                  return <PopupMenuEntry>[
-                    if (itemId != null) PopupMenuItem(
-                      child: Icon(Icons.info),
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => ItemDetailScreenAsync(
-                            itemId: itemId!,
-                          )),
-                        );
-                      },
-                    ),
-                    if (onItemUpdated != null) PopupMenuItem(
-                      onTap: itemId != null ? () async {
-                        await showDialog(context: context, builder: (context) {
-                          return PartItemCreateDialog(
-                            onCreate: (id, name, description) async {
-                              onItemUpdated!(id, name, description);
-                            },
-                            qty: qty,
-                            description: description,
-                            item: itemId != null ? Item(id: itemId!, name: name, description: description) : null,
-                          );
-                        });
-                      } : null,
-                      child: Icon(Icons.edit),
-                    ),
-                    if (onItemDelete != null) PopupMenuItem(
-                      child: Icon(Icons.delete),
-                      onTap: () async {
-                        final confirm = await showDialog(context: context, builder: (context) {
-                          return DeleteConfirmationDialog();
-                        });
+          if (onItemDelete != null || onItemUpdated != null || itemId != null)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                PopupMenuButton(
+                  itemBuilder: (context) {
+                    return <PopupMenuEntry>[
+                      if (itemId != null)
+                        PopupMenuItem(
+                          child: Icon(Icons.info),
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder:
+                                    (context) =>
+                                        ItemDetailScreenAsync(itemId: itemId!),
+                              ),
+                            );
+                          },
+                        ),
+                      if (onItemUpdated != null)
+                        PopupMenuItem(
+                          onTap:
+                              itemId != null
+                                  ? () async {
+                                    await showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return PartItemCreateDialog(
+                                          title: 'Edit Item',
+                                          buttonText: 'Update',
+                                          onCreate: (
+                                            id,
+                                            name,
+                                            description,
+                                          ) async {
+                                            onItemUpdated!(
+                                              id,
+                                              name,
+                                              description,
+                                            );
+                                          },
+                                          qty: qty,
+                                          description: description,
+                                          item:
+                                              itemId != null
+                                                  ? Item(
+                                                    id: itemId!,
+                                                    name: name,
+                                                    description: description,
+                                                  )
+                                                  : null,
+                                        );
+                                      },
+                                    );
+                                  }
+                                  : null,
+                          child: Icon(Icons.edit),
+                        ),
+                      if (onItemDelete != null)
+                        PopupMenuItem(
+                          child: Icon(Icons.delete),
+                          onTap: () async {
+                            final confirm = await showDialog(
+                              context: context,
+                              builder: (context) {
+                                return DeleteConfirmationDialog();
+                              },
+                            );
 
-                        if (confirm != null && confirm && onItemDelete != null) {
-                          onItemDelete!();
-                        }
-                      },
-                    ),
-                  ];
-                },
-              ),
-            ],
-          ),
+                            if (confirm != null &&
+                                confirm &&
+                                onItemDelete != null) {
+                              onItemDelete!();
+                            }
+                          },
+                        ),
+                    ];
+                  },
+                ),
+              ],
+            ),
         ],
       ),
-      onTap: onTap
+      onTap: onTap,
     );
   }
 }

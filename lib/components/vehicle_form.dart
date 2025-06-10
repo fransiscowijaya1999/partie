@@ -6,7 +6,7 @@ class VehicleForm extends StatefulWidget {
     this.setName,
     this.setDescription,
     this.name = '',
-    this.description = ''
+    this.description = '',
   });
 
   final ValueSetter<String>? setName;
@@ -23,7 +23,9 @@ class _VehicleFormState extends State<VehicleForm> {
   final descriptionController = TextEditingController();
 
   void _setName() {
-    if (widget.setName != null) { widget.setName!(nameController.text); }
+    if (widget.setName != null) {
+      widget.setName!(nameController.text);
+    }
   }
 
   void _setDesc() {
@@ -57,17 +59,26 @@ class _VehicleFormState extends State<VehicleForm> {
         child: Column(
           children: [
             TextField(
+              enableSuggestions: false,
               controller: nameController,
               decoration: decorationGenerator('Name'),
             ),
-            SizedBox(height: 5,),
-            TextField(
-              keyboardType: TextInputType.multiline,
-              minLines: 3,
-              maxLines: 8,
-              controller: descriptionController,
-              decoration: decorationGenerator('Description'),
-            )
+            SizedBox(height: 5),
+            Card(
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: TextField(
+                  style: TextStyle(fontSize: 12),
+                  enableSuggestions: false,
+                  keyboardType: TextInputType.multiline,
+                  minLines: 3,
+                  maxLines: 10,
+                  controller: descriptionController,
+                  decoration: decorationGenerator('Description'),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -76,7 +87,5 @@ class _VehicleFormState extends State<VehicleForm> {
 }
 
 InputDecoration decorationGenerator(String labelText) {
-  return InputDecoration(
-    labelText: labelText
-  );
+  return InputDecoration(labelText: labelText);
 }
