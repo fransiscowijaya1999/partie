@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:partie/database.dart';
+import 'package:partie/repositories/part.dart';
 
 class VehicleListStream {
   const VehicleListStream(
@@ -55,9 +56,19 @@ class VehicleRepository {
   }
 
   static Future<void> deleteVehicle(int id) async {
-    await db.managers.vehicles
-      .filter((f) => f.id.equals(id))
-      .delete();
+    await db.transaction(() async {
+      final partLinks = await db.managers.partVehicles
+        .filter((f) => f.vehicleId.id.equals(id))
+        .get();
+      
+      for (final link in partLinks) {
+        await PartRepository.unlinkPart(link.partId, id);
+      }
+
+      await db.managers.vehicles
+        .filter((f) => f.id.equals(id))
+        .delete();
+    });
   }
 
   static Future<Vehicle?>getVehicle(int id) async {
