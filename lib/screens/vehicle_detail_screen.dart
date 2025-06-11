@@ -176,20 +176,26 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                       SizedBox(height: 10),
                     ],
                     if (vehicle.description.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: SizedBox(
-                          height: 350,
-                          child: Card(
-                            color: Colors.white,
-                            child: SingleChildScrollView(
-                              child: Padding(
-                                padding: const EdgeInsets.all(15),
-                                child: MarkdownBlock(data: vehicle.description),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: SizedBox(
+                                height: 350,
+                                child: Card(
+                                  color: Colors.white,
+                                  child: SingleChildScrollView(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(15),
+                                      child: MarkdownBlock(data: vehicle.description),
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     Divider(),
                     Padding(

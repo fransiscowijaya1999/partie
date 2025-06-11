@@ -118,7 +118,6 @@ class ItemRepository {
       final partDescription = part.description;
 
       final pathList = await _getPartPath(partId);
-      print('safe');
 
       for (final path in pathList) {
         final toAdd = ItemPath(path: path, description: partDescription);

@@ -153,58 +153,72 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
                 return SingleChildScrollView(
                   child: Column(
                     children: [
-                      Text(part.name),
+                      Text(part.name, style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20
+                      )),
                       part.description.isNotEmpty
-                          ? Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: SizedBox(
-                              height: 250,
-                              child: Card(
-                                color: Colors.white,
-                                child: SingleChildScrollView(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(15),
-                                    child: MarkdownBlock(
-                                      data: part.description,
+                          ? Row(
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: SizedBox(
+                                    height: 250,
+                                    child: Card(
+                                      color: Colors.white,
+                                      child: SingleChildScrollView(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(15),
+                                          child: MarkdownBlock(
+                                            data: part.description,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
+                            ],
                           )
                           : SizedBox(height: 10),
-                      SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed:
-                                  () => _showEditPartDialog(
-                                    part.name,
-                                    part.description,
-                                  ),
-                              child: Icon(Icons.edit),
+                      Divider(),
+                      Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed:
+                                    () => _showEditPartDialog(
+                                      part.name,
+                                      part.description,
+                                    ),
+                                child: Icon(Icons.edit),
+                              ),
                             ),
-                          ),
-                          ElevatedButton(
-                            onPressed: () async {
-                              if (widget.isVehiclePart) {
-                                await PartRepository.unlinkPart(
-                                  part.id,
-                                  widget.parentId,
-                                );
-                              } else {
-                                await PartRepository.deletePart(part.id);
-                              }
-
-                              if (context.mounted) {
-                                Navigator.of(context).pop();
-                              }
-                            },
-                            child: Icon(Icons.delete),
-                          ),
-                        ],
+                            SizedBox(width: 10,),
+                            ElevatedButton(
+                              onPressed: () async {
+                                if (widget.isVehiclePart) {
+                                  await PartRepository.unlinkPart(
+                                    part.id,
+                                    widget.parentId,
+                                  );
+                                } else {
+                                  await PartRepository.deletePart(part.id);
+                                }
+                        
+                                if (context.mounted) {
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                              child: Icon(Icons.delete),
+                            ),
+                          ],
+                        ),
                       ),
+                      Divider(),
                       SizedBox(height: 10),
                       FutureBuilder(
                         future: _partChildrenFuture,

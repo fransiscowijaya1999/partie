@@ -109,6 +109,7 @@ class _PartItemCreateDialogState extends State<PartItemCreateDialog> {
                       ? Center(child: CircularProgressIndicator())
                       : Text(widget.buttonText),
             ),
+            Spacer(flex: 1),
             TextButton(
               onPressed: () {
                 Navigator.pop(context, null);

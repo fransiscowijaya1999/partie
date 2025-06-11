@@ -52,19 +52,30 @@ class _ItemSelectionDialogState extends State<ItemSelectionDialog> {
     return SimpleDialog(
       title: Text('Select Item'),
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: queryController,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: queryController,
+                      decoration: InputDecoration(
+                        hintText: 'Search...'
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10,),
+                  ElevatedButton(
+                    onPressed: queryController.text.length > 3 ? _createItem : null,
+                    child: Icon(Icons.add
+                  ))
+                ],
               ),
             ),
-            SizedBox(width: 10,),
-            ElevatedButton(
-              onPressed: queryController.text.length > 3 ? _createItem : null,
-              child: Icon(Icons.add
-            ))
-          ],
+          ),
         ),
         SizedBox(height: 10,),
         SizedBox(
