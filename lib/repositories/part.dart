@@ -81,6 +81,7 @@ class PartRepository {
 
   static Future<void> deletePart(int partId) async {
     return db.transaction(() async {
+      await deletePartRelated(partId);
       await db.managers.parts.filter((f) => f.id.equals(partId)).delete();
     });
   }
