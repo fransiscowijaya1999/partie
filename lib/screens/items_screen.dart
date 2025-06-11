@@ -21,6 +21,12 @@ class _ItemsScreenState extends State<ItemsScreen> {
   final queryController = TextEditingController();
 
   @override
+  void dispose() {
+    queryController.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
 

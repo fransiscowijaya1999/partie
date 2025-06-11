@@ -32,6 +32,12 @@ class _VehicleEditScreenState extends State<VehicleEditScreen> {
   final parentController = TextEditingController();
 
   @override
+  void dispose() {
+    parentController.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     name = widget.name;

@@ -22,6 +22,14 @@ class _VehicleCreateScreenState extends State<VehicleCreateScreen> {
   final parentController = TextEditingController();
 
   @override
+  void dispose() {
+    nameController.dispose();
+    descriptionController.dispose();
+    parentController.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
 

@@ -21,6 +21,12 @@ class _VehicleSelectionDialogState extends State<VehicleSelectionDialog> {
   late Future<List<Vehicle>> _vehicleFuture;
 
   @override
+  void dispose() {
+    queryController.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     _vehicleFuture = VehicleRepository.filter(name: queryController.text);

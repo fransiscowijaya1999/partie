@@ -22,6 +22,12 @@ class _VehicleScreenState extends State<VehiclesScreen> {
   final queryController = TextEditingController();
 
   @override
+  void dispose() {
+    queryController.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
 

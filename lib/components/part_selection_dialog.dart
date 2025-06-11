@@ -24,6 +24,12 @@ class _PartSelectionDialogState extends State<PartSelectionDialog> {
   Vehicle? _selectedVehicle;
 
   @override
+  void dispose() {
+    queryController.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     _vehicleFuture = VehicleRepository.filter(name: queryController.text);
