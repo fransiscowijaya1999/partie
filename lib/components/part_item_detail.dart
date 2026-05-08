@@ -11,18 +11,30 @@ class PartItemDetail extends StatelessWidget {
     required this.name,
     this.qty = '',
     this.description = '',
+    this.topCoordinate,
+    this.leftCoordinate,
     this.onTap,
     this.onItemDelete,
     this.onItemUpdated,
+    required this.imagePath,
   });
 
   final int? itemId;
   final String name;
   final String qty;
   final String description;
+  final double? topCoordinate;
+  final double? leftCoordinate;
+  final String imagePath;
   final VoidCallback? onTap;
   final VoidCallback? onItemDelete;
-  final Function(int itemId, String name, String description)? onItemUpdated;
+  final Function(
+    int newItemId,
+    String qty,
+    String description,
+    double? topCoordinate,
+    double? leftCoordinate,
+  )? onItemUpdated;
 
   @override
   Widget build(BuildContext context) {
@@ -90,17 +102,24 @@ class PartItemDetail extends StatelessWidget {
                                       context: context,
                                       builder: (context) {
                                         return PartItemCreateDialog(
+                                          imagePath: imagePath,
                                           title: 'Edit Item',
                                           buttonText: 'Update',
+                                          initialTopCoordinate: topCoordinate,
+                                          initialLeftCoordinate: leftCoordinate,
                                           onCreate: (
-                                            id,
-                                            name,
+                                            itemId,
+                                            qty,
                                             description,
+                                            topCoordinate,
+                                            leftCoordinate,
                                           ) async {
                                             onItemUpdated!(
-                                              id,
-                                              name,
+                                              itemId,
+                                              qty,
                                               description,
+                                              topCoordinate,
+                                              leftCoordinate,
                                             );
                                           },
                                           qty: qty,

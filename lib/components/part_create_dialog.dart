@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart'
+    show ImagePicker, ImageSource, XFile;
 import 'package:partie/components/vehicle_form.dart';
 
 class PartCreateDialog extends StatefulWidget {
@@ -7,15 +11,22 @@ class PartCreateDialog extends StatefulWidget {
     required this.onCreate,
     this.name = '',
     this.description = '',
+    this.catalogImage,
     this.title = 'Create Part',
     this.buttonText = 'Create',
   });
 
   final String name;
   final String description;
+  final String? catalogImage;
   final String title;
   final String buttonText;
-  final Future Function(String name, String description) onCreate;
+  final Future Function(
+    String name,
+    String description,
+    String? catalogImagePath,
+  )
+  onCreate;
 
   @override
   State<PartCreateDialog> createState() => _PartCreateDialogState();
@@ -24,6 +35,7 @@ class PartCreateDialog extends StatefulWidget {
 class _PartCreateDialogState extends State<PartCreateDialog> {
   late String name;
   late String description;
+  late String? catalogImage;
   bool isLoading = false;
 
   @override
@@ -32,6 +44,13 @@ class _PartCreateDialogState extends State<PartCreateDialog> {
 
     name = widget.name;
     description = widget.description;
+    catalogImage = widget.catalogImage;
+  }
+
+  void _setCatalogImage(String path) {
+    setState(() {
+      catalogImage = path;
+    });
   }
 
   void _setName(String text) {
@@ -46,6 +65,18 @@ class _PartCreateDialogState extends State<PartCreateDialog> {
     });
   }
 
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+
+    final XFile? pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+    );
+
+    if (pickedFile == null) return;
+
+    _setCatalogImage(pickedFile.path);
+  }
+
   @override
   Widget build(BuildContext context) {
     return SimpleDialog(
@@ -53,11 +84,24 @@ class _PartCreateDialogState extends State<PartCreateDialog> {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: VehicleForm(
-            setName: _setName,
-            setDescription: _setDesc,
-            name: name,
-            description: description,
+          child: Column(
+            children: [
+              catalogImage != null
+                  ? Image.file(File(catalogImage!), height: 250, width: 250)
+                  : const Text('No catalog image'),
+              SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: _pickImage,
+                child: const Text('Select Image'),
+              ),
+              SizedBox(height: 10),
+              VehicleForm(
+                setName: _setName,
+                setDescription: _setDesc,
+                name: name,
+                description: description,
+              ),
+            ],
           ),
         ),
         SizedBox(height: 10),
@@ -70,7 +114,11 @@ class _PartCreateDialogState extends State<PartCreateDialog> {
                     isLoading
                         ? null
                         : () async {
-                          await widget.onCreate(name, description);
+                          await widget.onCreate(
+                            name,
+                            description,
+                            catalogImage,
+                          );
                           if (context.mounted) {
                             Navigator.pop(context, null);
                           }
@@ -80,7 +128,7 @@ class _PartCreateDialogState extends State<PartCreateDialog> {
                         ? Center(child: CircularProgressIndicator())
                         : Text(widget.buttonText),
               ),
-              Spacer(flex: 1,),
+              Spacer(flex: 1),
               TextButton(
                 onPressed: () {
                   Navigator.pop(context, null);

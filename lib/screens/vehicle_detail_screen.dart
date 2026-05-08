@@ -1,3 +1,6 @@
+import 'dart:io' show Directory, File;
+
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:markdown_widget/markdown_widget.dart';
@@ -8,6 +11,9 @@ import 'package:partie/database.dart';
 import 'package:partie/repositories/part.dart';
 import 'package:partie/repositories/vehicle.dart';
 import 'package:partie/screens/vehicle_edit_screen.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
+import 'package:path/path.dart' as p;
 
 class VehicleDetailScreen extends StatefulWidget {
   const VehicleDetailScreen({super.key, required this.vehicle});
@@ -37,10 +43,27 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
       context: context,
       builder: (context) {
         return PartCreateDialog(
-          onCreate: (name, description) async {
+          onCreate: (name, description, imagePath) async {
+            String? finalPath;
+
+            if (imagePath != null) {
+              final Directory appDir = await getApplicationDocumentsDirectory();
+
+              var uuid = Uuid();
+
+              final String ext = p.extension(imagePath);
+              final String fileName = '${appDir.path}/${uuid.v4()}$ext';
+              final String savedPath = p.join(appDir.path, fileName);
+
+              await File(imagePath).copy(savedPath);
+
+              finalPath = savedPath;
+            }
+
             await PartRepository.createPartForVehicle(
               widget.vehicle.id,
               name,
+              Value(finalPath),
               description,
             );
 
@@ -188,7 +211,9 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                                   child: SingleChildScrollView(
                                     child: Padding(
                                       padding: const EdgeInsets.all(15),
-                                      child: MarkdownBlock(data: vehicle.description),
+                                      child: MarkdownBlock(
+                                        data: vehicle.description,
+                                      ),
                                     ),
                                   ),
                                 ),

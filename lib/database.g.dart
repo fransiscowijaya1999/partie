@@ -600,6 +600,17 @@ class $PartsTable extends Parts with TableInfo<$PartsTable, Part> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _catalogImagePathMeta = const VerificationMeta(
+    'catalogImagePath',
+  );
+  @override
+  late final GeneratedColumn<String> catalogImagePath = GeneratedColumn<String>(
+    'catalog_image_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _parentIdMeta = const VerificationMeta(
     'parentId',
   );
@@ -615,7 +626,13 @@ class $PartsTable extends Parts with TableInfo<$PartsTable, Part> {
     ),
   );
   @override
-  List<GeneratedColumn> get $columns => [id, name, description, parentId];
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    description,
+    catalogImagePath,
+    parentId,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -650,6 +667,15 @@ class $PartsTable extends Parts with TableInfo<$PartsTable, Part> {
     } else if (isInserting) {
       context.missing(_descriptionMeta);
     }
+    if (data.containsKey('catalog_image_path')) {
+      context.handle(
+        _catalogImagePathMeta,
+        catalogImagePath.isAcceptableOrUnknown(
+          data['catalog_image_path']!,
+          _catalogImagePathMeta,
+        ),
+      );
+    }
     if (data.containsKey('parent_id')) {
       context.handle(
         _parentIdMeta,
@@ -680,6 +706,10 @@ class $PartsTable extends Parts with TableInfo<$PartsTable, Part> {
             DriftSqlType.string,
             data['${effectivePrefix}description'],
           )!,
+      catalogImagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}catalog_image_path'],
+      ),
       parentId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}parent_id'],
@@ -697,11 +727,13 @@ class Part extends DataClass implements Insertable<Part> {
   final int id;
   final String name;
   final String description;
+  final String? catalogImagePath;
   final int? parentId;
   const Part({
     required this.id,
     required this.name,
     required this.description,
+    this.catalogImagePath,
     this.parentId,
   });
   @override
@@ -710,6 +742,9 @@ class Part extends DataClass implements Insertable<Part> {
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
     map['description'] = Variable<String>(description);
+    if (!nullToAbsent || catalogImagePath != null) {
+      map['catalog_image_path'] = Variable<String>(catalogImagePath);
+    }
     if (!nullToAbsent || parentId != null) {
       map['parent_id'] = Variable<int>(parentId);
     }
@@ -721,6 +756,10 @@ class Part extends DataClass implements Insertable<Part> {
       id: Value(id),
       name: Value(name),
       description: Value(description),
+      catalogImagePath:
+          catalogImagePath == null && nullToAbsent
+              ? const Value.absent()
+              : Value(catalogImagePath),
       parentId:
           parentId == null && nullToAbsent
               ? const Value.absent()
@@ -737,6 +776,7 @@ class Part extends DataClass implements Insertable<Part> {
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String>(json['description']),
+      catalogImagePath: serializer.fromJson<String?>(json['catalogImagePath']),
       parentId: serializer.fromJson<int?>(json['parentId']),
     );
   }
@@ -747,6 +787,7 @@ class Part extends DataClass implements Insertable<Part> {
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String>(description),
+      'catalogImagePath': serializer.toJson<String?>(catalogImagePath),
       'parentId': serializer.toJson<int?>(parentId),
     };
   }
@@ -755,11 +796,16 @@ class Part extends DataClass implements Insertable<Part> {
     int? id,
     String? name,
     String? description,
+    Value<String?> catalogImagePath = const Value.absent(),
     Value<int?> parentId = const Value.absent(),
   }) => Part(
     id: id ?? this.id,
     name: name ?? this.name,
     description: description ?? this.description,
+    catalogImagePath:
+        catalogImagePath.present
+            ? catalogImagePath.value
+            : this.catalogImagePath,
     parentId: parentId.present ? parentId.value : this.parentId,
   );
   Part copyWithCompanion(PartsCompanion data) {
@@ -768,6 +814,10 @@ class Part extends DataClass implements Insertable<Part> {
       name: data.name.present ? data.name.value : this.name,
       description:
           data.description.present ? data.description.value : this.description,
+      catalogImagePath:
+          data.catalogImagePath.present
+              ? data.catalogImagePath.value
+              : this.catalogImagePath,
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
     );
   }
@@ -778,13 +828,15 @@ class Part extends DataClass implements Insertable<Part> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
+          ..write('catalogImagePath: $catalogImagePath, ')
           ..write('parentId: $parentId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, description, parentId);
+  int get hashCode =>
+      Object.hash(id, name, description, catalogImagePath, parentId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -792,6 +844,7 @@ class Part extends DataClass implements Insertable<Part> {
           other.id == this.id &&
           other.name == this.name &&
           other.description == this.description &&
+          other.catalogImagePath == this.catalogImagePath &&
           other.parentId == this.parentId);
 }
 
@@ -799,17 +852,20 @@ class PartsCompanion extends UpdateCompanion<Part> {
   final Value<int> id;
   final Value<String> name;
   final Value<String> description;
+  final Value<String?> catalogImagePath;
   final Value<int?> parentId;
   const PartsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.description = const Value.absent(),
+    this.catalogImagePath = const Value.absent(),
     this.parentId = const Value.absent(),
   });
   PartsCompanion.insert({
     this.id = const Value.absent(),
     required String name,
     required String description,
+    this.catalogImagePath = const Value.absent(),
     this.parentId = const Value.absent(),
   }) : name = Value(name),
        description = Value(description);
@@ -817,12 +873,14 @@ class PartsCompanion extends UpdateCompanion<Part> {
     Expression<int>? id,
     Expression<String>? name,
     Expression<String>? description,
+    Expression<String>? catalogImagePath,
     Expression<int>? parentId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (description != null) 'description': description,
+      if (catalogImagePath != null) 'catalog_image_path': catalogImagePath,
       if (parentId != null) 'parent_id': parentId,
     });
   }
@@ -831,12 +889,14 @@ class PartsCompanion extends UpdateCompanion<Part> {
     Value<int>? id,
     Value<String>? name,
     Value<String>? description,
+    Value<String?>? catalogImagePath,
     Value<int?>? parentId,
   }) {
     return PartsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
+      catalogImagePath: catalogImagePath ?? this.catalogImagePath,
       parentId: parentId ?? this.parentId,
     );
   }
@@ -853,6 +913,9 @@ class PartsCompanion extends UpdateCompanion<Part> {
     if (description.present) {
       map['description'] = Variable<String>(description.value);
     }
+    if (catalogImagePath.present) {
+      map['catalog_image_path'] = Variable<String>(catalogImagePath.value);
+    }
     if (parentId.present) {
       map['parent_id'] = Variable<int>(parentId.value);
     }
@@ -865,6 +928,7 @@ class PartsCompanion extends UpdateCompanion<Part> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
+          ..write('catalogImagePath: $catalogImagePath, ')
           ..write('parentId: $parentId')
           ..write(')'))
         .toString();
@@ -877,6 +941,19 @@ class $PartItemsTable extends PartItems
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $PartItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
   static const VerificationMeta _partIdMeta = const VerificationMeta('partId');
   @override
   late final GeneratedColumn<int> partId = GeneratedColumn<int>(
@@ -901,6 +978,28 @@ class $PartItemsTable extends PartItems
       'REFERENCES items (id)',
     ),
   );
+  static const VerificationMeta _topCoordinateMeta = const VerificationMeta(
+    'topCoordinate',
+  );
+  @override
+  late final GeneratedColumn<double> topCoordinate = GeneratedColumn<double>(
+    'top_coordinate',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _leftCoordinateMeta = const VerificationMeta(
+    'leftCoordinate',
+  );
+  @override
+  late final GeneratedColumn<double> leftCoordinate = GeneratedColumn<double>(
+    'left_coordinate',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _qtyMeta = const VerificationMeta('qty');
   @override
   late final GeneratedColumn<String> qty = GeneratedColumn<String>(
@@ -922,7 +1021,15 @@ class $PartItemsTable extends PartItems
     requiredDuringInsert: true,
   );
   @override
-  List<GeneratedColumn> get $columns => [partId, itemId, qty, description];
+  List<GeneratedColumn> get $columns => [
+    id,
+    partId,
+    itemId,
+    topCoordinate,
+    leftCoordinate,
+    qty,
+    description,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -935,6 +1042,9 @@ class $PartItemsTable extends PartItems
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
     if (data.containsKey('part_id')) {
       context.handle(
         _partIdMeta,
@@ -950,6 +1060,24 @@ class $PartItemsTable extends PartItems
       );
     } else if (isInserting) {
       context.missing(_itemIdMeta);
+    }
+    if (data.containsKey('top_coordinate')) {
+      context.handle(
+        _topCoordinateMeta,
+        topCoordinate.isAcceptableOrUnknown(
+          data['top_coordinate']!,
+          _topCoordinateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('left_coordinate')) {
+      context.handle(
+        _leftCoordinateMeta,
+        leftCoordinate.isAcceptableOrUnknown(
+          data['left_coordinate']!,
+          _leftCoordinateMeta,
+        ),
+      );
     }
     if (data.containsKey('qty')) {
       context.handle(
@@ -974,11 +1102,16 @@ class $PartItemsTable extends PartItems
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => const {};
+  Set<GeneratedColumn> get $primaryKey => {id};
   @override
   PartItem map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return PartItem(
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}id'],
+          )!,
       partId:
           attachedDatabase.typeMapping.read(
             DriftSqlType.int,
@@ -989,6 +1122,14 @@ class $PartItemsTable extends PartItems
             DriftSqlType.int,
             data['${effectivePrefix}item_id'],
           )!,
+      topCoordinate: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}top_coordinate'],
+      ),
+      leftCoordinate: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}left_coordinate'],
+      ),
       qty:
           attachedDatabase.typeMapping.read(
             DriftSqlType.string,
@@ -1009,21 +1150,34 @@ class $PartItemsTable extends PartItems
 }
 
 class PartItem extends DataClass implements Insertable<PartItem> {
+  final int id;
   final int partId;
   final int itemId;
+  final double? topCoordinate;
+  final double? leftCoordinate;
   final String qty;
   final String description;
   const PartItem({
+    required this.id,
     required this.partId,
     required this.itemId,
+    this.topCoordinate,
+    this.leftCoordinate,
     required this.qty,
     required this.description,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
     map['part_id'] = Variable<int>(partId);
     map['item_id'] = Variable<int>(itemId);
+    if (!nullToAbsent || topCoordinate != null) {
+      map['top_coordinate'] = Variable<double>(topCoordinate);
+    }
+    if (!nullToAbsent || leftCoordinate != null) {
+      map['left_coordinate'] = Variable<double>(leftCoordinate);
+    }
     map['qty'] = Variable<String>(qty);
     map['description'] = Variable<String>(description);
     return map;
@@ -1031,8 +1185,17 @@ class PartItem extends DataClass implements Insertable<PartItem> {
 
   PartItemsCompanion toCompanion(bool nullToAbsent) {
     return PartItemsCompanion(
+      id: Value(id),
       partId: Value(partId),
       itemId: Value(itemId),
+      topCoordinate:
+          topCoordinate == null && nullToAbsent
+              ? const Value.absent()
+              : Value(topCoordinate),
+      leftCoordinate:
+          leftCoordinate == null && nullToAbsent
+              ? const Value.absent()
+              : Value(leftCoordinate),
       qty: Value(qty),
       description: Value(description),
     );
@@ -1044,8 +1207,11 @@ class PartItem extends DataClass implements Insertable<PartItem> {
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return PartItem(
+      id: serializer.fromJson<int>(json['id']),
       partId: serializer.fromJson<int>(json['partId']),
       itemId: serializer.fromJson<int>(json['itemId']),
+      topCoordinate: serializer.fromJson<double?>(json['topCoordinate']),
+      leftCoordinate: serializer.fromJson<double?>(json['leftCoordinate']),
       qty: serializer.fromJson<String>(json['qty']),
       description: serializer.fromJson<String>(json['description']),
     );
@@ -1054,28 +1220,48 @@ class PartItem extends DataClass implements Insertable<PartItem> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
       'partId': serializer.toJson<int>(partId),
       'itemId': serializer.toJson<int>(itemId),
+      'topCoordinate': serializer.toJson<double?>(topCoordinate),
+      'leftCoordinate': serializer.toJson<double?>(leftCoordinate),
       'qty': serializer.toJson<String>(qty),
       'description': serializer.toJson<String>(description),
     };
   }
 
   PartItem copyWith({
+    int? id,
     int? partId,
     int? itemId,
+    Value<double?> topCoordinate = const Value.absent(),
+    Value<double?> leftCoordinate = const Value.absent(),
     String? qty,
     String? description,
   }) => PartItem(
+    id: id ?? this.id,
     partId: partId ?? this.partId,
     itemId: itemId ?? this.itemId,
+    topCoordinate:
+        topCoordinate.present ? topCoordinate.value : this.topCoordinate,
+    leftCoordinate:
+        leftCoordinate.present ? leftCoordinate.value : this.leftCoordinate,
     qty: qty ?? this.qty,
     description: description ?? this.description,
   );
   PartItem copyWithCompanion(PartItemsCompanion data) {
     return PartItem(
+      id: data.id.present ? data.id.value : this.id,
       partId: data.partId.present ? data.partId.value : this.partId,
       itemId: data.itemId.present ? data.itemId.value : this.itemId,
+      topCoordinate:
+          data.topCoordinate.present
+              ? data.topCoordinate.value
+              : this.topCoordinate,
+      leftCoordinate:
+          data.leftCoordinate.present
+              ? data.leftCoordinate.value
+              : this.leftCoordinate,
       qty: data.qty.present ? data.qty.value : this.qty,
       description:
           data.description.present ? data.description.value : this.description,
@@ -1085,8 +1271,11 @@ class PartItem extends DataClass implements Insertable<PartItem> {
   @override
   String toString() {
     return (StringBuffer('PartItem(')
+          ..write('id: $id, ')
           ..write('partId: $partId, ')
           ..write('itemId: $itemId, ')
+          ..write('topCoordinate: $topCoordinate, ')
+          ..write('leftCoordinate: $leftCoordinate, ')
           ..write('qty: $qty, ')
           ..write('description: $description')
           ..write(')'))
@@ -1094,80 +1283,114 @@ class PartItem extends DataClass implements Insertable<PartItem> {
   }
 
   @override
-  int get hashCode => Object.hash(partId, itemId, qty, description);
+  int get hashCode => Object.hash(
+    id,
+    partId,
+    itemId,
+    topCoordinate,
+    leftCoordinate,
+    qty,
+    description,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is PartItem &&
+          other.id == this.id &&
           other.partId == this.partId &&
           other.itemId == this.itemId &&
+          other.topCoordinate == this.topCoordinate &&
+          other.leftCoordinate == this.leftCoordinate &&
           other.qty == this.qty &&
           other.description == this.description);
 }
 
 class PartItemsCompanion extends UpdateCompanion<PartItem> {
+  final Value<int> id;
   final Value<int> partId;
   final Value<int> itemId;
+  final Value<double?> topCoordinate;
+  final Value<double?> leftCoordinate;
   final Value<String> qty;
   final Value<String> description;
-  final Value<int> rowid;
   const PartItemsCompanion({
+    this.id = const Value.absent(),
     this.partId = const Value.absent(),
     this.itemId = const Value.absent(),
+    this.topCoordinate = const Value.absent(),
+    this.leftCoordinate = const Value.absent(),
     this.qty = const Value.absent(),
     this.description = const Value.absent(),
-    this.rowid = const Value.absent(),
   });
   PartItemsCompanion.insert({
+    this.id = const Value.absent(),
     required int partId,
     required int itemId,
+    this.topCoordinate = const Value.absent(),
+    this.leftCoordinate = const Value.absent(),
     required String qty,
     required String description,
-    this.rowid = const Value.absent(),
   }) : partId = Value(partId),
        itemId = Value(itemId),
        qty = Value(qty),
        description = Value(description);
   static Insertable<PartItem> custom({
+    Expression<int>? id,
     Expression<int>? partId,
     Expression<int>? itemId,
+    Expression<double>? topCoordinate,
+    Expression<double>? leftCoordinate,
     Expression<String>? qty,
     Expression<String>? description,
-    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
+      if (id != null) 'id': id,
       if (partId != null) 'part_id': partId,
       if (itemId != null) 'item_id': itemId,
+      if (topCoordinate != null) 'top_coordinate': topCoordinate,
+      if (leftCoordinate != null) 'left_coordinate': leftCoordinate,
       if (qty != null) 'qty': qty,
       if (description != null) 'description': description,
-      if (rowid != null) 'rowid': rowid,
     });
   }
 
   PartItemsCompanion copyWith({
+    Value<int>? id,
     Value<int>? partId,
     Value<int>? itemId,
+    Value<double?>? topCoordinate,
+    Value<double?>? leftCoordinate,
     Value<String>? qty,
     Value<String>? description,
-    Value<int>? rowid,
   }) {
     return PartItemsCompanion(
+      id: id ?? this.id,
       partId: partId ?? this.partId,
       itemId: itemId ?? this.itemId,
+      topCoordinate: topCoordinate ?? this.topCoordinate,
+      leftCoordinate: leftCoordinate ?? this.leftCoordinate,
       qty: qty ?? this.qty,
       description: description ?? this.description,
-      rowid: rowid ?? this.rowid,
     );
   }
 
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
     if (partId.present) {
       map['part_id'] = Variable<int>(partId.value);
     }
     if (itemId.present) {
       map['item_id'] = Variable<int>(itemId.value);
+    }
+    if (topCoordinate.present) {
+      map['top_coordinate'] = Variable<double>(topCoordinate.value);
+    }
+    if (leftCoordinate.present) {
+      map['left_coordinate'] = Variable<double>(leftCoordinate.value);
     }
     if (qty.present) {
       map['qty'] = Variable<String>(qty.value);
@@ -1175,20 +1398,19 @@ class PartItemsCompanion extends UpdateCompanion<PartItem> {
     if (description.present) {
       map['description'] = Variable<String>(description.value);
     }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
     return map;
   }
 
   @override
   String toString() {
     return (StringBuffer('PartItemsCompanion(')
+          ..write('id: $id, ')
           ..write('partId: $partId, ')
           ..write('itemId: $itemId, ')
+          ..write('topCoordinate: $topCoordinate, ')
+          ..write('leftCoordinate: $leftCoordinate, ')
           ..write('qty: $qty, ')
-          ..write('description: $description, ')
-          ..write('rowid: $rowid')
+          ..write('description: $description')
           ..write(')'))
         .toString();
   }
@@ -2578,6 +2800,7 @@ typedef $$PartsTableCreateCompanionBuilder =
       Value<int> id,
       required String name,
       required String description,
+      Value<String?> catalogImagePath,
       Value<int?> parentId,
     });
 typedef $$PartsTableUpdateCompanionBuilder =
@@ -2585,6 +2808,7 @@ typedef $$PartsTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> name,
       Value<String> description,
+      Value<String?> catalogImagePath,
       Value<int?> parentId,
     });
 
@@ -2667,6 +2891,11 @@ class $$PartsTableFilterComposer extends Composer<_$AppDatabase, $PartsTable> {
 
   ColumnFilters<String> get description => $composableBuilder(
     column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get catalogImagePath => $composableBuilder(
+    column: $table.catalogImagePath,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2768,6 +2997,11 @@ class $$PartsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get catalogImagePath => $composableBuilder(
+    column: $table.catalogImagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$PartsTableOrderingComposer get parentId {
     final $$PartsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -2809,6 +3043,11 @@ class $$PartsTableAnnotationComposer
 
   GeneratedColumn<String> get description => $composableBuilder(
     column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get catalogImagePath => $composableBuilder(
+    column: $table.catalogImagePath,
     builder: (column) => column,
   );
 
@@ -2921,11 +3160,13 @@ class $$PartsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String> description = const Value.absent(),
+                Value<String?> catalogImagePath = const Value.absent(),
                 Value<int?> parentId = const Value.absent(),
               }) => PartsCompanion(
                 id: id,
                 name: name,
                 description: description,
+                catalogImagePath: catalogImagePath,
                 parentId: parentId,
               ),
           createCompanionCallback:
@@ -2933,11 +3174,13 @@ class $$PartsTableTableManager
                 Value<int> id = const Value.absent(),
                 required String name,
                 required String description,
+                Value<String?> catalogImagePath = const Value.absent(),
                 Value<int?> parentId = const Value.absent(),
               }) => PartsCompanion.insert(
                 id: id,
                 name: name,
                 description: description,
+                catalogImagePath: catalogImagePath,
                 parentId: parentId,
               ),
           withReferenceMapper:
@@ -3055,19 +3298,23 @@ typedef $$PartsTableProcessedTableManager =
     >;
 typedef $$PartItemsTableCreateCompanionBuilder =
     PartItemsCompanion Function({
+      Value<int> id,
       required int partId,
       required int itemId,
+      Value<double?> topCoordinate,
+      Value<double?> leftCoordinate,
       required String qty,
       required String description,
-      Value<int> rowid,
     });
 typedef $$PartItemsTableUpdateCompanionBuilder =
     PartItemsCompanion Function({
+      Value<int> id,
       Value<int> partId,
       Value<int> itemId,
+      Value<double?> topCoordinate,
+      Value<double?> leftCoordinate,
       Value<String> qty,
       Value<String> description,
-      Value<int> rowid,
     });
 
 final class $$PartItemsTableReferences
@@ -3120,6 +3367,21 @@ class $$PartItemsTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get topCoordinate => $composableBuilder(
+    column: $table.topCoordinate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get leftCoordinate => $composableBuilder(
+    column: $table.leftCoordinate,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get qty => $composableBuilder(
     column: $table.qty,
     builder: (column) => ColumnFilters(column),
@@ -3186,6 +3448,21 @@ class $$PartItemsTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get topCoordinate => $composableBuilder(
+    column: $table.topCoordinate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get leftCoordinate => $composableBuilder(
+    column: $table.leftCoordinate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get qty => $composableBuilder(
     column: $table.qty,
     builder: (column) => ColumnOrderings(column),
@@ -3252,6 +3529,19 @@ class $$PartItemsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<double> get topCoordinate => $composableBuilder(
+    column: $table.topCoordinate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get leftCoordinate => $composableBuilder(
+    column: $table.leftCoordinate,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get qty =>
       $composableBuilder(column: $table.qty, builder: (column) => column);
 
@@ -3335,31 +3625,39 @@ class $$PartItemsTableTableManager
               () => $$PartItemsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
+                Value<int> id = const Value.absent(),
                 Value<int> partId = const Value.absent(),
                 Value<int> itemId = const Value.absent(),
+                Value<double?> topCoordinate = const Value.absent(),
+                Value<double?> leftCoordinate = const Value.absent(),
                 Value<String> qty = const Value.absent(),
                 Value<String> description = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
               }) => PartItemsCompanion(
+                id: id,
                 partId: partId,
                 itemId: itemId,
+                topCoordinate: topCoordinate,
+                leftCoordinate: leftCoordinate,
                 qty: qty,
                 description: description,
-                rowid: rowid,
               ),
           createCompanionCallback:
               ({
+                Value<int> id = const Value.absent(),
                 required int partId,
                 required int itemId,
+                Value<double?> topCoordinate = const Value.absent(),
+                Value<double?> leftCoordinate = const Value.absent(),
                 required String qty,
                 required String description,
-                Value<int> rowid = const Value.absent(),
               }) => PartItemsCompanion.insert(
+                id: id,
                 partId: partId,
                 itemId: itemId,
+                topCoordinate: topCoordinate,
+                leftCoordinate: leftCoordinate,
                 qty: qty,
                 description: description,
-                rowid: rowid,
               ),
           withReferenceMapper:
               (p0) =>

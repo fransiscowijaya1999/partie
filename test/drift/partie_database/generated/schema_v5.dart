@@ -143,6 +143,13 @@ class Parts extends Table with TableInfo {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  late final GeneratedColumn<String> catalogImagePath = GeneratedColumn<String>(
+    'catalog_image_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   late final GeneratedColumn<int> parentId = GeneratedColumn<int>(
     'parent_id',
     aliasedName,
@@ -154,7 +161,13 @@ class Parts extends Table with TableInfo {
     ),
   );
   @override
-  List<GeneratedColumn> get $columns => [id, name, description, parentId];
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    description,
+    catalogImagePath,
+    parentId,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -198,6 +211,20 @@ class PartItems extends Table with TableInfo {
       'REFERENCES items (id)',
     ),
   );
+  late final GeneratedColumn<double> topCoordinate = GeneratedColumn<double>(
+    'top_coordinate',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  late final GeneratedColumn<double> leftCoordinate = GeneratedColumn<double>(
+    'left_coordinate',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   late final GeneratedColumn<String> qty = GeneratedColumn<String>(
     'qty',
     aliasedName,
@@ -213,14 +240,25 @@ class PartItems extends Table with TableInfo {
     requiredDuringInsert: true,
   );
   @override
-  List<GeneratedColumn> get $columns => [partId, itemId, qty, description];
+  List<GeneratedColumn> get $columns => [
+    partId,
+    itemId,
+    topCoordinate,
+    leftCoordinate,
+    qty,
+    description,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'part_items';
   @override
-  Set<GeneratedColumn> get $primaryKey => const {};
+  Set<GeneratedColumn> get $primaryKey => {partId, itemId};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {partId, itemId},
+  ];
   @override
   Never map(Map<String, dynamic> data, {String? tablePrefix}) {
     throw UnsupportedError('TableInfo.map in schema verification code');
@@ -344,8 +382,8 @@ class InheritedPartReplacements extends Table with TableInfo {
   }
 }
 
-class DatabaseAtV3 extends GeneratedDatabase {
-  DatabaseAtV3(QueryExecutor e) : super(e);
+class DatabaseAtV5 extends GeneratedDatabase {
+  DatabaseAtV5(QueryExecutor e) : super(e);
   late final Vehicles vehicles = Vehicles(this);
   late final Items items = Items(this);
   late final Parts parts = Parts(this);
@@ -366,5 +404,5 @@ class DatabaseAtV3 extends GeneratedDatabase {
     inheritedPartReplacements,
   ];
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 5;
 }

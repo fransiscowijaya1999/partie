@@ -258,9 +258,346 @@ i1.GeneratedColumn<int> _column_10(String aliasedName) =>
         'REFERENCES parts (id) ON DELETE CASCADE',
       ),
     );
+
+final class Schema4 extends i0.VersionedSchema {
+  Schema4({required super.database}) : super(version: 4);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    vehicles,
+    items,
+    parts,
+    partItems,
+    partVehicles,
+    inheritedPartReplacements,
+  ];
+  late final Shape0 vehicles = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'vehicles',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2, _column_3],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape1 items = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'items',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape5 parts = Shape5(
+    source: i0.VersionedTable(
+      entityName: 'parts',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2, _column_11, _column_4],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape6 partItems = Shape6(
+    source: i0.VersionedTable(
+      entityName: 'part_items',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_5,
+        _column_6,
+        _column_12,
+        _column_13,
+        _column_7,
+        _column_2,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape3 partVehicles = Shape3(
+    source: i0.VersionedTable(
+      entityName: 'part_vehicles',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['UNIQUE(part_id, vehicle_id)'],
+      columns: [_column_5, _column_8],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape4 inheritedPartReplacements = Shape4(
+    source: i0.VersionedTable(
+      entityName: 'inherited_part_replacements',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['UNIQUE(vehicle_id, inherited_part_id)'],
+      columns: [_column_8, _column_9, _column_10],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+}
+
+class Shape5 extends i0.VersionedTable {
+  Shape5({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<int> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get name =>
+      columnsByName['name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get description =>
+      columnsByName['description']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get catalogImagePath =>
+      columnsByName['catalog_image_path']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get parentId =>
+      columnsByName['parent_id']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<String> _column_11(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'catalog_image_path',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+    );
+
+class Shape6 extends i0.VersionedTable {
+  Shape6({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<int> get partId =>
+      columnsByName['part_id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get itemId =>
+      columnsByName['item_id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<double> get topCoordinate =>
+      columnsByName['top_coordinate']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get leftCoordinate =>
+      columnsByName['left_coordinate']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<String> get qty =>
+      columnsByName['qty']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get description =>
+      columnsByName['description']! as i1.GeneratedColumn<String>;
+}
+
+i1.GeneratedColumn<double> _column_12(String aliasedName) =>
+    i1.GeneratedColumn<double>(
+      'top_coordinate',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.double,
+    );
+i1.GeneratedColumn<double> _column_13(String aliasedName) =>
+    i1.GeneratedColumn<double>(
+      'left_coordinate',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.double,
+    );
+
+final class Schema5 extends i0.VersionedSchema {
+  Schema5({required super.database}) : super(version: 5);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    vehicles,
+    items,
+    parts,
+    partItems,
+    partVehicles,
+    inheritedPartReplacements,
+  ];
+  late final Shape0 vehicles = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'vehicles',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2, _column_3],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape1 items = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'items',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape5 parts = Shape5(
+    source: i0.VersionedTable(
+      entityName: 'parts',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2, _column_11, _column_4],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape6 partItems = Shape6(
+    source: i0.VersionedTable(
+      entityName: 'part_items',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'PRIMARY KEY(part_id, item_id)',
+        'UNIQUE(part_id, item_id)',
+      ],
+      columns: [
+        _column_5,
+        _column_6,
+        _column_12,
+        _column_13,
+        _column_7,
+        _column_2,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape3 partVehicles = Shape3(
+    source: i0.VersionedTable(
+      entityName: 'part_vehicles',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['UNIQUE(part_id, vehicle_id)'],
+      columns: [_column_5, _column_8],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape4 inheritedPartReplacements = Shape4(
+    source: i0.VersionedTable(
+      entityName: 'inherited_part_replacements',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['UNIQUE(vehicle_id, inherited_part_id)'],
+      columns: [_column_8, _column_9, _column_10],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+}
+
+final class Schema6 extends i0.VersionedSchema {
+  Schema6({required super.database}) : super(version: 6);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    vehicles,
+    items,
+    parts,
+    partItems,
+    partVehicles,
+    inheritedPartReplacements,
+  ];
+  late final Shape0 vehicles = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'vehicles',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2, _column_3],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape1 items = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'items',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape5 parts = Shape5(
+    source: i0.VersionedTable(
+      entityName: 'parts',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2, _column_11, _column_4],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape7 partItems = Shape7(
+    source: i0.VersionedTable(
+      entityName: 'part_items',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_5,
+        _column_6,
+        _column_12,
+        _column_13,
+        _column_7,
+        _column_2,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape3 partVehicles = Shape3(
+    source: i0.VersionedTable(
+      entityName: 'part_vehicles',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['UNIQUE(part_id, vehicle_id)'],
+      columns: [_column_5, _column_8],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape4 inheritedPartReplacements = Shape4(
+    source: i0.VersionedTable(
+      entityName: 'inherited_part_replacements',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['UNIQUE(vehicle_id, inherited_part_id)'],
+      columns: [_column_8, _column_9, _column_10],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+}
+
+class Shape7 extends i0.VersionedTable {
+  Shape7({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<int> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get partId =>
+      columnsByName['part_id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get itemId =>
+      columnsByName['item_id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<double> get topCoordinate =>
+      columnsByName['top_coordinate']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get leftCoordinate =>
+      columnsByName['left_coordinate']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<String> get qty =>
+      columnsByName['qty']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get description =>
+      columnsByName['description']! as i1.GeneratedColumn<String>;
+}
+
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
+  required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
+  required Future<void> Function(i1.Migrator m, Schema5 schema) from4To5,
+  required Future<void> Function(i1.Migrator m, Schema6 schema) from5To6,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -274,6 +611,21 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from2To3(migrator, schema);
         return 3;
+      case 3:
+        final schema = Schema4(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from3To4(migrator, schema);
+        return 4;
+      case 4:
+        final schema = Schema5(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from4To5(migrator, schema);
+        return 5;
+      case 5:
+        final schema = Schema6(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from5To6(migrator, schema);
+        return 6;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -283,6 +635,15 @@ i0.MigrationStepWithVersion migrationSteps({
 i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
+  required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
+  required Future<void> Function(i1.Migrator m, Schema5 schema) from4To5,
+  required Future<void> Function(i1.Migrator m, Schema6 schema) from5To6,
 }) => i0.VersionedSchema.stepByStepHelper(
-  step: migrationSteps(from1To2: from1To2, from2To3: from2To3),
+  step: migrationSteps(
+    from1To2: from1To2,
+    from2To3: from2To3,
+    from3To4: from3To4,
+    from4To5: from4To5,
+    from5To6: from5To6,
+  ),
 );
