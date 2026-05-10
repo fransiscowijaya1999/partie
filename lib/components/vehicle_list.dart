@@ -18,6 +18,7 @@ class VehicleList extends StatelessWidget {
       return Center(child: Text('Vehicle not found'),);
     } else {
       return ListView.builder(
+        physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         itemCount: vehicles!.length,
         itemBuilder: (context, index) {

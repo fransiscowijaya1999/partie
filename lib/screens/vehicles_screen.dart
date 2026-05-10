@@ -40,14 +40,6 @@ class _VehicleScreenState extends State<VehiclesScreen> {
     });
   }
 
-  void movePage(int move) {
-    setState(() {
-      page += move;
-      _vehiclesStream = VehicleRepository.filterWithAggregateWatch(name: queryController.text, page: page, limit: limit);
-    });
-  }
-
-
   @override
   Widget build(BuildContext context) {
     return MainScaffold(

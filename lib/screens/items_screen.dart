@@ -32,7 +32,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
 
     _itemsStream = ItemRepository.filterWithAggregateWatch(
       name: queryController.text,
-      limit: 10,
+      limit: limit,
       page: page,
     );
 
@@ -42,7 +42,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
 
         _itemsStream = ItemRepository.filterWithAggregateWatch(
           name: queryController.text,
-          limit: 10,
+          limit: limit,
           page: page,
         );
       });
@@ -108,7 +108,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
                               _itemsStream =
                                   ItemRepository.filterWithAggregateWatch(
                                     name: queryController.text,
-                                    limit: 10,
+                                    limit: limit,
                                     page: page,
                                   );
                             });

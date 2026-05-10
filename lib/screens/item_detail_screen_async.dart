@@ -40,6 +40,7 @@ class _ItemDetailScreenAsyncState extends State<ItemDetailScreenAsync> {
               id: item.id,
               name: item.name,
               description: item.description,
+              image: item.image,
             ),
       ),
     );
@@ -88,6 +89,11 @@ class _ItemDetailScreenAsyncState extends State<ItemDetailScreenAsync> {
                   child: Column(
                     children: [
                       Center(child: Text(item.name)),
+                      if (item.image != null)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: Image.memory(item.image!, height: 250),
+                        ),
                       SizedBox(height: 10),
                       Row(
                         children: [

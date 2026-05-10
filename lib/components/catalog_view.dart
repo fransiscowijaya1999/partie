@@ -79,6 +79,7 @@ class _CatalogViewState extends State<CatalogView> {
                               name: item.name,
                               qty: item.qty,
                               description: item.description,
+                              image: item.image,
                             ),
                       );
                     },

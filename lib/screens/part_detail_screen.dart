@@ -11,7 +11,6 @@ import 'package:partie/components/part_item_create_dialog.dart';
 import 'package:partie/database.dart';
 import 'package:partie/models/part_child.dart';
 import 'package:partie/repositories/part.dart';
-import 'package:partie/utils/string_builder.dart';
 import 'package:path_provider/path_provider.dart'
     show getApplicationDocumentsDirectory;
 import 'package:uuid/uuid.dart' show Uuid;
@@ -20,13 +19,13 @@ import 'package:path/path.dart' as p;
 class PartDetailScreen extends StatefulWidget {
   const PartDetailScreen({
     super.key,
-    required this.title,
+    required this.titleSegments,
     required this.parentId,
     required this.partId,
     this.isVehiclePart = true,
   });
 
-  final String title;
+  final List<String> titleSegments;
   final int parentId;
   final int partId;
   final bool isVehiclePart;
@@ -36,7 +35,7 @@ class PartDetailScreen extends StatefulWidget {
 }
 
 class _PartDetailScreenState extends State<PartDetailScreen> {
-  late String title;
+  late List<String> titleSegments;
   late Stream<Part> _partStream;
   late Future<List<PartChild>> _partChildrenFuture;
 
@@ -114,11 +113,11 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
               description,
             );
 
-            final seperated = title.split(" \\ ");
-            seperated.removeLast();
-
             setState(() {
-              title = StringBuilder.titleBuilder(seperated.join(" \\ "), name);
+              titleSegments = [
+                ...titleSegments.sublist(0, titleSegments.length - 1),
+                name,
+              ];
               _partStream = PartRepository.getPartDetailStream(widget.partId);
               _partChildrenFuture = PartRepository.getPartChildren(
                 widget.partId,
@@ -172,7 +171,7 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
   void initState() {
     super.initState();
 
-    title = widget.title;
+    titleSegments = widget.titleSegments;
     _partStream = PartRepository.getPartDetailStream(widget.partId);
     _partChildrenFuture = PartRepository.getPartChildren(widget.partId);
   }
@@ -180,7 +179,12 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(title, style: TextStyle(fontSize: 12))),
+      appBar: AppBar(
+        title: Text(
+          titleSegments.join(' \\ '),
+          style: TextStyle(fontSize: 12),
+        ),
+      ),
       floatingActionButtonLocation: ExpandableFab.location,
       floatingActionButton: ExpandableFab(
         children: [
@@ -312,7 +316,7 @@ class _PartDetailScreenState extends State<PartDetailScreen> {
                               Divider(),
                               SizedBox(height: 10),
                               PartChildren(
-                                title: widget.title,
+                                titleSegments: titleSegments,
                                 children: children,
                                 parentId: widget.partId,
                                 imagePath: part.catalogImagePath ?? '',

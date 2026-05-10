@@ -350,8 +350,17 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _imageMeta = const VerificationMeta('image');
   @override
-  List<GeneratedColumn> get $columns => [id, name, description];
+  late final GeneratedColumn<Uint8List> image = GeneratedColumn<Uint8List>(
+    'image',
+    aliasedName,
+    true,
+    type: DriftSqlType.blob,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, description, image];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -386,6 +395,12 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
     } else if (isInserting) {
       context.missing(_descriptionMeta);
     }
+    if (data.containsKey('image')) {
+      context.handle(
+        _imageMeta,
+        image.isAcceptableOrUnknown(data['image']!, _imageMeta),
+      );
+    }
     return context;
   }
 
@@ -410,6 +425,10 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
             DriftSqlType.string,
             data['${effectivePrefix}description'],
           )!,
+      image: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}image'],
+      ),
     );
   }
 
@@ -423,13 +442,22 @@ class Item extends DataClass implements Insertable<Item> {
   final int id;
   final String name;
   final String description;
-  const Item({required this.id, required this.name, required this.description});
+  final Uint8List? image;
+  const Item({
+    required this.id,
+    required this.name,
+    required this.description,
+    this.image,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
     map['description'] = Variable<String>(description);
+    if (!nullToAbsent || image != null) {
+      map['image'] = Variable<Uint8List>(image);
+    }
     return map;
   }
 
@@ -438,6 +466,8 @@ class Item extends DataClass implements Insertable<Item> {
       id: Value(id),
       name: Value(name),
       description: Value(description),
+      image:
+          image == null && nullToAbsent ? const Value.absent() : Value(image),
     );
   }
 
@@ -450,6 +480,7 @@ class Item extends DataClass implements Insertable<Item> {
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String>(json['description']),
+      image: serializer.fromJson<Uint8List?>(json['image']),
     );
   }
   @override
@@ -459,13 +490,20 @@ class Item extends DataClass implements Insertable<Item> {
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String>(description),
+      'image': serializer.toJson<Uint8List?>(image),
     };
   }
 
-  Item copyWith({int? id, String? name, String? description}) => Item(
+  Item copyWith({
+    int? id,
+    String? name,
+    String? description,
+    Value<Uint8List?> image = const Value.absent(),
+  }) => Item(
     id: id ?? this.id,
     name: name ?? this.name,
     description: description ?? this.description,
+    image: image.present ? image.value : this.image,
   );
   Item copyWithCompanion(ItemsCompanion data) {
     return Item(
@@ -473,6 +511,7 @@ class Item extends DataClass implements Insertable<Item> {
       name: data.name.present ? data.name.value : this.name,
       description:
           data.description.present ? data.description.value : this.description,
+      image: data.image.present ? data.image.value : this.image,
     );
   }
 
@@ -481,46 +520,54 @@ class Item extends DataClass implements Insertable<Item> {
     return (StringBuffer('Item(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('description: $description')
+          ..write('description: $description, ')
+          ..write('image: $image')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, description);
+  int get hashCode =>
+      Object.hash(id, name, description, $driftBlobEquality.hash(image));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Item &&
           other.id == this.id &&
           other.name == this.name &&
-          other.description == this.description);
+          other.description == this.description &&
+          $driftBlobEquality.equals(other.image, this.image));
 }
 
 class ItemsCompanion extends UpdateCompanion<Item> {
   final Value<int> id;
   final Value<String> name;
   final Value<String> description;
+  final Value<Uint8List?> image;
   const ItemsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.description = const Value.absent(),
+    this.image = const Value.absent(),
   });
   ItemsCompanion.insert({
     this.id = const Value.absent(),
     required String name,
     required String description,
+    this.image = const Value.absent(),
   }) : name = Value(name),
        description = Value(description);
   static Insertable<Item> custom({
     Expression<int>? id,
     Expression<String>? name,
     Expression<String>? description,
+    Expression<Uint8List>? image,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (description != null) 'description': description,
+      if (image != null) 'image': image,
     });
   }
 
@@ -528,11 +575,13 @@ class ItemsCompanion extends UpdateCompanion<Item> {
     Value<int>? id,
     Value<String>? name,
     Value<String>? description,
+    Value<Uint8List?>? image,
   }) {
     return ItemsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
+      image: image ?? this.image,
     );
   }
 
@@ -548,6 +597,9 @@ class ItemsCompanion extends UpdateCompanion<Item> {
     if (description.present) {
       map['description'] = Variable<String>(description.value);
     }
+    if (image.present) {
+      map['image'] = Variable<Uint8List>(image.value);
+    }
     return map;
   }
 
@@ -556,7 +608,8 @@ class ItemsCompanion extends UpdateCompanion<Item> {
     return (StringBuffer('ItemsCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('description: $description')
+          ..write('description: $description, ')
+          ..write('image: $image')
           ..write(')'))
         .toString();
   }
@@ -2545,12 +2598,14 @@ typedef $$ItemsTableCreateCompanionBuilder =
       Value<int> id,
       required String name,
       required String description,
+      Value<Uint8List?> image,
     });
 typedef $$ItemsTableUpdateCompanionBuilder =
     ItemsCompanion Function({
       Value<int> id,
       Value<String> name,
       Value<String> description,
+      Value<Uint8List?> image,
     });
 
 final class $$ItemsTableReferences
@@ -2596,6 +2651,11 @@ class $$ItemsTableFilterComposer extends Composer<_$AppDatabase, $ItemsTable> {
 
   ColumnFilters<String> get description => $composableBuilder(
     column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<Uint8List> get image => $composableBuilder(
+    column: $table.image,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2648,6 +2708,11 @@ class $$ItemsTableOrderingComposer
     column: $table.description,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<Uint8List> get image => $composableBuilder(
+    column: $table.image,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ItemsTableAnnotationComposer
@@ -2669,6 +2734,9 @@ class $$ItemsTableAnnotationComposer
     column: $table.description,
     builder: (column) => column,
   );
+
+  GeneratedColumn<Uint8List> get image =>
+      $composableBuilder(column: $table.image, builder: (column) => column);
 
   Expression<T> partItemsRefs<T extends Object>(
     Expression<T> Function($$PartItemsTableAnnotationComposer a) f,
@@ -2727,17 +2795,24 @@ class $$ItemsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String> description = const Value.absent(),
-              }) =>
-                  ItemsCompanion(id: id, name: name, description: description),
+                Value<Uint8List?> image = const Value.absent(),
+              }) => ItemsCompanion(
+                id: id,
+                name: name,
+                description: description,
+                image: image,
+              ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String name,
                 required String description,
+                Value<Uint8List?> image = const Value.absent(),
               }) => ItemsCompanion.insert(
                 id: id,
                 name: name,
                 description: description,
+                image: image,
               ),
           withReferenceMapper:
               (p0) =>

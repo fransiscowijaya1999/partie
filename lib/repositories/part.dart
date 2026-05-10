@@ -313,6 +313,7 @@ class PartRepository {
             isCategory: false,
             topCoordinate: i.$1.topCoordinate,
             leftCoordinate: i.$1.leftCoordinate,
+            image: i.$2.itemId.prefetchedData?.firstOrNull?.image,
           ),
         ),
         ...parts.map(

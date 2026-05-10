@@ -41,6 +41,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               id: widget.item.id,
               name: widget.item.name,
               description: widget.item.description,
+              image: widget.item.image,
             ),
       ),
     );
@@ -77,6 +78,11 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         child: Column(
           children: [
             Center(child: Text(item.name)),
+            if (item.image != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Image.memory(item.image!, height: 250),
+              ),
             Padding(
               padding: EdgeInsets.all(10),
               child: Row(

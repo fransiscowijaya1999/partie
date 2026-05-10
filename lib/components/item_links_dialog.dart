@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:partie/repositories/item.dart';
 
-class ItemLinksDialog extends StatelessWidget {
+class ItemLinksDialog extends StatefulWidget {
   const ItemLinksDialog({
     super.key,
     required this.itemId,
@@ -12,13 +12,32 @@ class ItemLinksDialog extends StatelessWidget {
   final int itemId;
 
   @override
+  State<ItemLinksDialog> createState() => _ItemLinksDialogState();
+}
+
+class _ItemLinksDialogState extends State<ItemLinksDialog> {
+  final Map<int, ExpansionTileController> _controllers = {};
+  int? _expandedIndex;
+  late final Future<List<ItemPath>> _pathsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _pathsFuture = ItemRepository.getItemLinkedPart(widget.itemId);
+  }
+
+  ExpansionTileController _controllerFor(int index) {
+    return _controllers.putIfAbsent(index, ExpansionTileController.new);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SimpleDialog(
-      title: Text(title, style: TextStyle(fontSize: 15)),
+      title: Text(widget.title, style: TextStyle(fontSize: 15)),
       children: [
         Divider(height: 2),
         FutureBuilder<List<ItemPath>>(
-          future: ItemRepository.getItemLinkedPart(itemId),
+          future: _pathsFuture,
           builder: (context, snapshot) {
             switch (snapshot.connectionState) {
               case ConnectionState.none:
@@ -37,12 +56,44 @@ class ItemLinksDialog extends StatelessWidget {
                       itemBuilder: (context, index) {
                         final path = paths[index];
 
-                        return ListTile(
+                        if (path.description.isEmpty) {
+                          return ListTile(
+                            title: Text(
+                              path.path,
+                              style: TextStyle(fontSize: 11),
+                            ),
+                            dense: true,
+                          );
+                        }
+
+                        return ExpansionTile(
+                          controller: _controllerFor(index),
                           title: Text(
                             path.path,
                             style: TextStyle(fontSize: 11),
                           ),
-                          dense: true,
+                          tilePadding: EdgeInsets.symmetric(horizontal: 16),
+                          childrenPadding: EdgeInsets.fromLTRB(16, 12, 16, 12),
+                          visualDensity: VisualDensity.compact,
+                          onExpansionChanged: (expanded) {
+                            if (expanded &&
+                                _expandedIndex != null &&
+                                _expandedIndex != index) {
+                              _controllers[_expandedIndex!]?.collapse();
+                            }
+                            setState(() {
+                              _expandedIndex = expanded ? index : null;
+                            });
+                          },
+                          children: [
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                path.description,
+                                style: TextStyle(fontSize: 10),
+                              ),
+                            ),
+                          ],
                         );
                       },
                       separatorBuilder: (context, index) {

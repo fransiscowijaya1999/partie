@@ -308,7 +308,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                               final parts = snapshot.data!;
 
                               return VehiclePartFinder(
-                                title: vehicle.name,
+                                titleSegments: [vehicle.name],
                                 parts: parts,
                                 vehicleId: vehicle.id,
                                 onPop: () {

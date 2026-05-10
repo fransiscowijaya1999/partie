@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:partie/components/part_item_detail.dart';
 import 'package:partie/models/part_child.dart';
 import 'package:partie/screens/part_detail_screen.dart';
-import 'package:partie/utils/string_builder.dart';
 
 class PartChildren extends StatelessWidget {
   const PartChildren({
@@ -12,13 +11,13 @@ class PartChildren extends StatelessWidget {
     this.onPop,
     this.onItemDelete,
     this.onItemUpdated,
-    this.title = '',
+    this.titleSegments = const [],
     required this.imagePath,
   });
 
   final List<PartChild> children;
   final int parentId;
-  final String title;
+  final List<String> titleSegments;
   final String imagePath;
   final VoidCallback? onPop;
   final ValueSetter<int?>? onItemDelete;
@@ -61,10 +60,10 @@ class PartChildren extends StatelessWidget {
                                 MaterialPageRoute(
                                   builder:
                                       (context) => PartDetailScreen(
-                                        title: StringBuilder.titleBuilder(
-                                          title,
+                                        titleSegments: [
+                                          ...titleSegments,
                                           child.name,
-                                        ),
+                                        ],
                                         partId: child.partId,
                                         parentId: parentId,
                                         isVehiclePart: false,

@@ -1,8 +1,13 @@
+import 'dart:typed_data';
+
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:partie/components/duplicate_list.dart';
 import 'package:partie/components/vehicle_form.dart';
 import 'package:partie/database.dart';
 import 'package:partie/repositories/item.dart';
+import 'package:partie/utils/image_compressor.dart';
 
 class ItemEditScreen extends StatefulWidget {
   const ItemEditScreen({
@@ -10,11 +15,13 @@ class ItemEditScreen extends StatefulWidget {
     required this.id,
     this.name = '',
     this.description = '',
+    this.image,
   });
 
   final int id;
   final String name;
   final String description;
+  final Uint8List? image;
 
   @override
   State<ItemEditScreen> createState() => _ItemEditScreenState();
@@ -25,12 +32,15 @@ class _ItemEditScreenState extends State<ItemEditScreen> {
 
   String name = '';
   String description = '';
+  Uint8List? _image;
+  bool _imageChanged = false;
 
   @override
   void initState() {
     super.initState();
     name = widget.name;
     description = widget.description;
+    _image = widget.image;
     _duplicates = ItemRepository.filter(
       name: name,
       limit: 5,
@@ -38,12 +48,42 @@ class _ItemEditScreenState extends State<ItemEditScreen> {
     );
   }
 
+  Future<void> _pickImage() async {
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (picked == null) return;
+
+    final compressed = await ImageCompressor.compressFile(picked.path);
+    if (compressed == null) return;
+
+    setState(() {
+      _image = compressed;
+      _imageChanged = true;
+    });
+  }
+
+  void _removeImage() {
+    setState(() {
+      _image = null;
+      _imageChanged = true;
+    });
+  }
+
   Future<void> _updateItem() async {
-    await ItemRepository.updateItem(widget.id, name, description);
+    await ItemRepository.updateItem(
+      widget.id,
+      name,
+      description,
+      image: _imageChanged ? Value(_image) : const Value.absent(),
+    );
     if (mounted) {
-      Navigator.of(
-        context,
-      ).pop(Item(id: widget.id, name: name, description: description));
+      Navigator.of(context).pop(
+        Item(
+          id: widget.id,
+          name: name,
+          description: description,
+          image: _image,
+        ),
+      );
     }
   }
 
@@ -70,7 +110,7 @@ class _ItemEditScreenState extends State<ItemEditScreen> {
       appBar: AppBar(
         title: Text('Edit: ${widget.name}', style: TextStyle(fontSize: 12)),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(10),
         child: Column(
           children: [
@@ -99,6 +139,27 @@ class _ItemEditScreenState extends State<ItemEditScreen> {
                           }
                         },
                       ),
+            ),
+            SizedBox(height: 10),
+            _image != null
+                ? Image.memory(_image!, height: 200)
+                : const Text('No image'),
+            SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: _pickImage,
+                  child: const Text('Select Image'),
+                ),
+                if (_image != null) ...[
+                  SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: _removeImage,
+                    child: const Icon(Icons.delete),
+                  ),
+                ],
+              ],
             ),
             SizedBox(height: 10),
             VehicleForm(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:partie/screens/backup_restore_screen.dart';
 import 'package:partie/screens/items_screen.dart';
 import 'package:partie/screens/vehicles_screen.dart';
 
@@ -29,7 +30,17 @@ class NavDrawer extends StatelessWidget {
                 MaterialPageRoute(builder: (context) => const ItemsScreen()),
               );
             },
-          )
+          ),
+          ListTile(
+            title: Text('Backup & Restore'),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const BackupRestoreScreen(),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:partie/components/vehicle_part_list.dart';
 import 'package:partie/database.dart';
+import 'package:partie/utils/search_query.dart';
 
 class VehiclePartFinder extends StatefulWidget {
   const VehiclePartFinder({
@@ -8,12 +9,12 @@ class VehiclePartFinder extends StatefulWidget {
     required this.parts,
     required this.vehicleId,
     this.onPop,
-    this.title = '',
+    this.titleSegments = const [],
   });
 
   final List<Part> parts;
   final int vehicleId;
-  final String title;
+  final List<String> titleSegments;
   final VoidCallback? onPop;
 
   @override
@@ -24,27 +25,20 @@ class _VehiclePartFinderState extends State<VehiclePartFinder> {
   final queryController = TextEditingController();
   List<Part> parts = [];
 
+  List<Part> _filter() {
+    final tokens = SearchQuery.tokenize(queryController.text);
+    return widget.parts
+        .where((part) => SearchQuery.matchesAll(part.name, tokens))
+        .toList();
+  }
+
   @override
   void initState() {
     super.initState();
-    parts =
-        widget.parts
-            .where(
-              (part) => part.name.toUpperCase().contains(
-                queryController.text.toUpperCase(),
-              ),
-            )
-            .toList();
+    parts = _filter();
     queryController.addListener(() {
       setState(() {
-        parts =
-            widget.parts
-                .where(
-                  (part) => part.name.toUpperCase().contains(
-                    queryController.text.toUpperCase(),
-                  ),
-                )
-                .toList();
+        parts = _filter();
       });
     });
   }
@@ -75,7 +69,7 @@ class _VehiclePartFinderState extends State<VehiclePartFinder> {
         VehiclePartList(
           parts: parts,
           vehicleId: widget.vehicleId,
-          title: widget.title,
+          titleSegments: widget.titleSegments,
           onPop: widget.onPop,
         ),
       ],

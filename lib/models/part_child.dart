@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 class PartChild {
   const PartChild({
     required this.partId,
@@ -9,6 +11,7 @@ class PartChild {
     this.description = '',
     this.topCoordinate,
     this.leftCoordinate,
+    this.image,
   });
 
   final int partId;
@@ -20,4 +23,5 @@ class PartChild {
   final String description;
   final double? topCoordinate;
   final double? leftCoordinate;
+  final Uint8List? image;
 }

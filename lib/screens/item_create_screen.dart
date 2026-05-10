@@ -1,8 +1,13 @@
+import 'dart:typed_data';
+
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:partie/components/duplicate_list.dart';
 import 'package:partie/components/vehicle_form_reactive.dart';
 import 'package:partie/database.dart';
 import 'package:partie/repositories/item.dart';
+import 'package:partie/utils/image_compressor.dart';
 
 class ItemCreateScreen extends StatefulWidget {
   const ItemCreateScreen({ super.key });
@@ -15,14 +20,14 @@ class _ItemCreateScreenState extends State<ItemCreateScreen> {
   late Future<List<Item>> _duplicates;
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
+  Uint8List? _image;
 
   void resetForm() {
     setState(() {
       nameController.text = '';
       descriptionController.text = '';
-      setState(() {
-        _duplicates = ItemRepository.filter(name: nameController.text, limit: 5);
-      });
+      _image = null;
+      _duplicates = ItemRepository.filter(name: nameController.text, limit: 5);
     });
   }
 
@@ -44,8 +49,24 @@ class _ItemCreateScreenState extends State<ItemCreateScreen> {
     });
   }
 
+  Future<void> _pickImage() async {
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (picked == null) return;
+
+    final compressed = await ImageCompressor.compressFile(picked.path);
+    if (compressed == null) return;
+
+    setState(() {
+      _image = compressed;
+    });
+  }
+
   Future<void> _submitItem() async {
-    await ItemRepository.createItem(nameController.text, descriptionController.text);
+    await ItemRepository.createItem(
+      nameController.text,
+      descriptionController.text,
+      image: _image != null ? Value(_image) : const Value.absent(),
+    );
 
     resetForm();
   }
@@ -54,7 +75,7 @@ class _ItemCreateScreenState extends State<ItemCreateScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Create Item'),),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(10),
         child: Column(
           children: [
@@ -81,6 +102,15 @@ class _ItemCreateScreenState extends State<ItemCreateScreen> {
                     }
                   },
                 )
+            ),
+            SizedBox(height: 10),
+            _image != null
+                ? Image.memory(_image!, height: 200)
+                : const Text('No image'),
+            SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: _pickImage,
+              child: const Text('Select Image'),
             ),
             SizedBox(height: 10,),
             VehicleFormReactive(

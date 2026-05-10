@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:partie/database.dart';
 import 'package:partie/repositories/part.dart';
+import 'package:partie/utils/search_query.dart';
 
 class VehicleListStream {
   const VehicleListStream(
@@ -14,9 +15,13 @@ class VehicleListStream {
 
 class VehicleRepository {
   static Future<List<Vehicle>> filter({ String name = '', int limit = 10, int? ignoredId }) async {
+    final tokens = SearchQuery.tokenize(name);
     var query = db.managers.vehicles
-      .filter((f) => f.name.contains(name, caseInsensitive: true));
-    
+      .filter((f) => f.name.contains('', caseInsensitive: true));
+    for (final token in tokens) {
+      query = query.filter((f) => f.name.contains(token, caseInsensitive: true));
+    }
+
     if (ignoredId != null) {
       query = query.filter((f) => f.id.not(ignoredId));
     }
@@ -27,18 +32,31 @@ class VehicleRepository {
   }
 
   static Stream<List<Vehicle>> filterWatch({ String name = '', int limit = 10, int? ignoredId }) {
+    final tokens = SearchQuery.tokenize(name);
     var query = db.managers.vehicles
-      .filter((f) => f.name.contains(name, caseInsensitive: true));
+      .filter((f) => f.name.contains('', caseInsensitive: true));
+    for (final token in tokens) {
+      query = query.filter((f) => f.name.contains(token, caseInsensitive: true));
+    }
 
     return query.watch(limit: limit);
   }
 
   static VehicleListStream filterWithAggregateWatch({ String name = '', int limit = 10, int page = 0, int? ignoredId }) {
+    final tokens = SearchQuery.tokenize(name);
     var query = db.managers.vehicles
-      .filter((f) => f.name.contains(name, caseInsensitive: true));
+      .filter((f) => f.name.contains('', caseInsensitive: true));
+    for (final token in tokens) {
+      query = query.filter((f) => f.name.contains(token, caseInsensitive: true));
+    }
 
-    final count = query
-      .count().asStream();
+    final countExp = db.vehicles.id.count();
+    final countQuery = db.selectOnly(db.vehicles)
+      ..addColumns([countExp]);
+    for (final token in tokens) {
+      countQuery.where(db.vehicles.name.lower().like('%${token.toLowerCase()}%'));
+    }
+    final count = countQuery.map((row) => row.read(countExp)!).watchSingle();
 
     final vehicles = query.watch(limit: limit, offset: page * limit);
 
@@ -112,7 +130,7 @@ class VehicleRepository {
     // return query.map((row) => row.readTable(db.parts)).watch();
 
     return db.customSelect(
-      'SELECT parts.id, parts.name, parts.description FROM parts'
+      'SELECT parts.id, parts.name, parts.description, parts.catalog_image_path, parts.parent_id FROM parts'
       ' INNER JOIN part_vehicles ON part_vehicles.part_id = parts.id'
       ' LEFT JOIN inherited_part_replacements ON inherited_part_replacements.replacement_part_id = parts.id'
       ' WHERE part_vehicles.vehicle_id = ?'
@@ -127,7 +145,7 @@ class VehicleRepository {
 
   static Future<List<Part>> searchPart(int vehicleId, { int? parentId, String name = '', int limit = 0 }) {
     return db.customSelect(
-      'SELECT parts.id, parts.name, parts.description FROM parts'
+      'SELECT parts.id, parts.name, parts.description, parts.catalog_image_path, parts.parent_id FROM parts'
       ' INNER JOIN part_vehicles ON part_vehicles.part_id = parts.id'
       ' LEFT JOIN inherited_part_replacements ON inherited_part_replacements.replacement_part_id = parts.id'
       ' WHERE part_vehicles.vehicle_id = ?'

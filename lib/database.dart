@@ -25,7 +25,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration {
@@ -96,6 +96,11 @@ class AppDatabase extends _$AppDatabase {
           await migrator.database.customStatement(
             'ALTER TABLE part_items_new RENAME TO part_items',
           );
+        }
+        if (from < 7) {
+          final schema = Schema7(database: migrator.database);
+          final m = Migrator(migrator.database, schema);
+          await m.addColumn(schema.items, schema.items.image);
         }
       },
     );

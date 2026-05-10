@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:partie/database.dart';
+import 'package:partie/utils/search_query.dart';
 import 'package:partie/utils/string_builder.dart';
 
 class PartItemData {
@@ -29,15 +30,15 @@ class ItemRepository {
     int limit = 10,
     int? ignoredId,
   }) async {
-    List<Item> items = await db.managers.items
-        .filter(
-          (f) =>
-              f.name.contains(name, caseInsensitive: true) &
-              f.id.not(ignoredId),
-        )
-        .get(limit: limit);
+    final tokens = SearchQuery.tokenize(name);
+    var query = db.managers.items.filter((f) => f.id.not(ignoredId));
+    for (final token in tokens) {
+      query = query.filter(
+        (f) => f.name.contains(token, caseInsensitive: true),
+      );
+    }
 
-    return items;
+    return await query.get(limit: limit);
   }
 
   static ItemListStream filterWithAggregateWatch({
@@ -46,11 +47,22 @@ class ItemRepository {
     int page = 0,
     int? ignoredId,
   }) {
+    final tokens = SearchQuery.tokenize(name);
     var query = db.managers.items.filter(
-      (f) => f.name.contains(name, caseInsensitive: true),
+      (f) => f.name.contains('', caseInsensitive: true),
     );
+    for (final token in tokens) {
+      query = query.filter(
+        (f) => f.name.contains(token, caseInsensitive: true),
+      );
+    }
 
-    final count = query.count().asStream();
+    final countExp = db.items.id.count();
+    final countQuery = db.selectOnly(db.items)..addColumns([countExp]);
+    for (final token in tokens) {
+      countQuery.where(db.items.name.lower().like('%${token.toLowerCase()}%'));
+    }
+    final count = countQuery.map((row) => row.read(countExp)!).watchSingle();
 
     final items = query.watch(limit: limit, offset: page * limit);
 
@@ -61,9 +73,13 @@ class ItemRepository {
     return db.managers.items.watch();
   }
 
-  static Future<int> createItem(String name, String description) async {
+  static Future<int> createItem(
+    String name,
+    String description, {
+    Value<Uint8List?> image = const Value.absent(),
+  }) async {
     return await db.managers.items.create(
-      (o) => o(name: name, description: description),
+      (o) => o(name: name, description: description, image: image),
     );
   }
 
@@ -74,11 +90,18 @@ class ItemRepository {
   static Future<void> updateItem(
     int id,
     String name,
-    String description,
-  ) async {
+    String description, {
+    Value<Uint8List?> image = const Value.absent(),
+  }) async {
     await db.managers.items
         .filter((f) => f.id.equals(id))
-        .update((f) => f(name: Value(name), description: Value(description)));
+        .update(
+          (f) => f(
+            name: Value(name),
+            description: Value(description),
+            image: image,
+          ),
+        );
   }
 
   static Future<List<String>> _getPartPath(int id) async {
