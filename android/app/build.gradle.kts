@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.partie"
+    namespace = "com.wijayamotor.partie"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
