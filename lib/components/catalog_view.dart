@@ -87,9 +87,12 @@ class _CatalogViewState extends State<CatalogView> {
                       width: 10,
                       height: 10,
                       decoration: BoxDecoration(
-                        color: Colors.lightBlue.withAlpha(150),
+                        color: Colors.lightBlue.withAlpha(75),
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.black, width: 1),
+                        border: Border.all(
+                          color: Colors.black.withAlpha(128),
+                          width: 1,
+                        ),
                       ),
                     ),
                   ),
