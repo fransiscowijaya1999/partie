@@ -68,8 +68,8 @@ class _CatalogViewState extends State<CatalogView> {
               Image.file(File(widget.imagePath), fit: BoxFit.contain),
               ...widget.items.map(
                 (item) => Positioned(
-                  top: item.topCoordinate! * scale - 7.5,
-                  left: item.leftCoordinate! * scale - 7.5,
+                  top: item.topCoordinate! * scale - 5,
+                  left: item.leftCoordinate! * scale - 5,
                   child: GestureDetector(
                     onTap: () {
                       showDialog(
@@ -84,8 +84,8 @@ class _CatalogViewState extends State<CatalogView> {
                       );
                     },
                     child: Container(
-                      width: 15,
-                      height: 15,
+                      width: 10,
+                      height: 10,
                       decoration: BoxDecoration(
                         color: Colors.lightBlue.withAlpha(150),
                         shape: BoxShape.circle,

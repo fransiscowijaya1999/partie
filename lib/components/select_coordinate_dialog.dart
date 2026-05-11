@@ -83,7 +83,7 @@ class _SelectCoordinateDialogState extends State<SelectCoordinateDialog> {
         transformationController: _controller,
         child: GestureDetector(
           key: _imageKey,
-          onTapDown: (details) {
+          onTapUp: (details) {
             final coord = _toImageCoordinates(details.localPosition);
             if (coord != null) Navigator.of(context).pop(coord);
           },
